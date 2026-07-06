@@ -1,0 +1,269 @@
+import { useState, useMemo } from "react";
+import "./App.css";
+import { NOTE_NAMES, MOODS, GENRES } from "./data/musicData.js";
+import { generateSong, generateSectionData } from "./lib/generateProgression.js";
+import { generateStructure } from "./lib/generateStructure.js";
+import { songDurationSeconds, formatDuration } from "./lib/duration.js";
+import { usePlayback } from "./hooks/usePlayback.js";
+import StructureEditor from "./components/StructureEditor.jsx";
+import LeadSheet from "./components/LeadSheet.jsx";
+
+const suggestTempo = (genre, mood) => Math.round(genre.tempo * mood.tempoMod);
+
+function SectionHeader({ label, open, onToggle }) {
+  return (
+    <h2 className="section-toggle-label">
+      <button type="button" className="section-toggle" onClick={onToggle} aria-expanded={open}>
+        <span>{label}</span>
+        <span className={`toggle-switch ${open ? "on" : ""}`} aria-hidden="true" />
+      </button>
+    </h2>
+  );
+}
+
+export default function App() {
+  const [genreId, setGenreId] = useState("jpop");
+  const [moodId, setMoodId] = useState("wistful");
+  const [keyIndex, setKeyIndex] = useState(0);
+  const [keyMode, setKeyMode] = useState("major");
+  const [structure, setStructure] = useState([]);
+  const [open, setOpen] = useState({ genre: true, mood: true, key: true, bpm: true, structure: true });
+  const toggleSection = (k) => setOpen((prev) => ({ ...prev, [k]: !prev[k] }));
+  const [bpm, setBpm] = useState(() => suggestTempo(GENRES.find((g) => g.id === "jpop"), MOODS.find((m) => m.id === "wistful")));
+  const [song, setSong] = useState(null);
+  const [copied, setCopied] = useState(false);
+
+  const { playing, cursor, play, stop } = usePlayback();
+
+  const genre = useMemo(() => GENRES.find((g) => g.id === genreId), [genreId]);
+  const mood = useMemo(() => MOODS.find((m) => m.id === moodId), [moodId]);
+  const previewTempo = suggestTempo(genre, mood);
+
+  const selectGenre = (g) => {
+    setGenreId(g.id);
+    setBpm(suggestTempo(g, mood));
+  };
+  const selectMood = (m) => {
+    setMoodId(m.id);
+    setBpm(suggestTempo(genre, m));
+  };
+
+  const totalBars = structure.reduce((sum, s) => sum + s.bars, 0);
+  const durationPreview = formatDuration(songDurationSeconds(totalBars, bpm));
+  const keyModeLabel = keyMode === "minor" ? "マイナー" : "メジャー";
+
+  const generate = () => {
+    if (structure.length === 0) return;
+    stop();
+    setSong(generateSong(structure, genre, mood, keyIndex, { keyMode, bpm }));
+    setCopied(false);
+  };
+
+  const makeStructure = () => {
+    setStructure(generateStructure(genre, bpm));
+  };
+
+  const updateChord = (si, bi, newChord) => {
+    setSong((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        sections: prev.sections.map((sec, i) =>
+          i !== si ? sec : { ...sec, chords: sec.chords.map((c, j) => (j === bi ? newChord : c)) }
+        ),
+      };
+    });
+  };
+
+  const addSection = (type, bars) => {
+    const newSection = { type, bars, moodId: null };
+    setStructure((prev) => [...prev, newSection]);
+    setSong((prev) => {
+      if (!prev) return prev;
+      const sectionData = generateSectionData(newSection, genre, mood, keyIndex, { keyMode });
+      return { ...prev, sections: [...prev.sections, sectionData] };
+    });
+  };
+
+  const regenerateSection = (si) => {
+    setSong((prev) => {
+      if (!prev) return prev;
+      const current = prev.sections[si];
+      const sectionData = generateSectionData(
+        { type: current.type, bars: current.bars, moodId: current.moodId },
+        genre,
+        mood,
+        keyIndex,
+        { keyMode }
+      );
+      return { ...prev, sections: prev.sections.map((sec, i) => (i === si ? sectionData : sec)) };
+    });
+  };
+
+  const removeGeneratedSection = (si) => {
+    setStructure((prev) => prev.filter((_, i) => i !== si));
+    setSong((prev) => (prev ? { ...prev, sections: prev.sections.filter((_, i) => i !== si) } : prev));
+  };
+
+  const reorderGeneratedSection = (from, to) => {
+    if (from === to) return;
+    stop();
+    const reorder = (arr) => {
+      const copy = [...arr];
+      const [moved] = copy.splice(from, 1);
+      copy.splice(to, 0, moved);
+      return copy;
+    };
+    setStructure((prev) => reorder(prev));
+    setSong((prev) => (prev ? { ...prev, sections: reorder(prev.sections) } : prev));
+  };
+
+  const copyText = () => {
+    if (!song) return;
+    const head = `[${song.genreLabel} × ${song.moodLabel} / ${NOTE_NAMES[keyIndex]}${keyModeLabel} / ♩=${song.tempo}]`;
+    const text =
+      head +
+      "\n" +
+      song.sections.map((s) => `${s.label}: ${s.chords.map((c) => c.name).join(" | ")}`).join("\n");
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1600);
+    });
+  };
+
+  return (
+    <div className="app" style={{ "--acc": mood.accent, "--acc-soft": mood.accentSoft }}>
+      <div className="wrap">
+        <header>
+          <div className="logo">Chord Palette</div>
+          <div className="tag">ジャンル × ムードで作るコード進行</div>
+        </header>
+
+        <div className="grid">
+          {/* Controls */}
+          <div className="panel">
+            <SectionHeader label="ジャンル" open={open.genre} onToggle={() => toggleSection("genre")} />
+            {open.genre && (
+              <div className="chips" role="group" aria-label="ジャンル選択">
+                {GENRES.map((g) => (
+                  <button
+                    key={g.id}
+                    className={`chip ${g.id === genreId ? "genre-on" : ""}`}
+                    onClick={() => selectGenre(g)}
+                  >
+                    {g.label}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            <SectionHeader label="ムード" open={open.mood} onToggle={() => toggleSection("mood")} />
+            {open.mood && (
+              <div className="chips" role="group" aria-label="ムード選択">
+                {MOODS.map((m) => (
+                  <button
+                    key={m.id}
+                    className={`chip ${m.id === moodId ? "on" : ""}`}
+                    style={m.id === moodId ? { background: m.accent, borderColor: m.accent } : {}}
+                    onClick={() => selectMood(m)}
+                  >
+                    {m.label}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            <SectionHeader label="キー" open={open.key} onToggle={() => toggleSection("key")} />
+            {open.key && (
+              <div className="row">
+                <select value={keyIndex} onChange={(e) => setKeyIndex(Number(e.target.value))} aria-label="キー">
+                  {NOTE_NAMES.map((n, i) => (
+                    <option key={n} value={i}>{n} {keyModeLabel}</option>
+                  ))}
+                </select>
+                <div className="chips" role="group" aria-label="キーの種類">
+                  <button
+                    className={`chip ${keyMode === "major" ? "genre-on" : ""}`}
+                    onClick={() => setKeyMode("major")}
+                  >
+                    メジャー
+                  </button>
+                  <button
+                    className={`chip ${keyMode === "minor" ? "genre-on" : ""}`}
+                    onClick={() => setKeyMode("minor")}
+                  >
+                    マイナー
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <SectionHeader label="BPM" open={open.bpm} onToggle={() => toggleSection("bpm")} />
+            {open.bpm && (
+              <>
+                <div className="row">
+                  <div className="stepper">
+                    <button onClick={() => setBpm((v) => Math.max(40, v - 1))} aria-label="BPMを減らす">−</button>
+                    <input
+                      className="bpm-input"
+                      type="number"
+                      min={40}
+                      max={240}
+                      value={bpm}
+                      onChange={(e) => setBpm(Math.min(240, Math.max(40, Number(e.target.value) || 0)))}
+                      aria-label="BPM"
+                    />
+                    <button onClick={() => setBpm((v) => Math.min(240, v + 1))} aria-label="BPMを増やす">＋</button>
+                  </div>
+                  <span className="duration">全{totalBars}小節 ・ 約{durationPreview}</span>
+                </div>
+                <button className="add" onClick={() => setBpm(previewTempo)}>提案値({previewTempo})に戻す</button>
+              </>
+            )}
+
+            <SectionHeader label="曲構成" open={open.structure} onToggle={() => toggleSection("structure")} />
+            {open.structure && (
+              <>
+                <button className="make-structure" onClick={makeStructure}>
+                  ✦ 曲構成を作成（約4分・おまかせ）
+                </button>
+                {structure.length === 0 && (
+                  <div className="structure-empty">
+                    上のボタンでおまかせ作成するか、下からセクションを追加してください
+                  </div>
+                )}
+                <StructureEditor structure={structure} onChange={setStructure} />
+              </>
+            )}
+
+            <button className="gen" onClick={generate} disabled={structure.length === 0}>
+              コード進行を生成
+            </button>
+            <div className="combo">
+              <b>{genre.label}</b> × <b>{mood.label}</b> ・ {NOTE_NAMES[keyIndex]}{keyModeLabel} ・ ♩={bpm}
+            </div>
+          </div>
+
+          {/* Sheet */}
+          <div className="sheet">
+            <LeadSheet
+              song={song}
+              cursor={cursor}
+              playing={playing}
+              onPlay={() => play(song)}
+              onStop={stop}
+              onRegenerate={generate}
+              onCopy={copyText}
+              copied={copied}
+              onChangeChord={updateChord}
+              onAddSection={addSection}
+              onRemoveSection={removeGeneratedSection}
+              onReorderSections={reorderGeneratedSection}
+              onRegenerateSection={regenerateSection}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
