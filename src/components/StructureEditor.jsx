@@ -61,7 +61,7 @@ export default function StructureEditor({ structure, onChange }) {
           >
             <option value="">ムード：共通設定を使用</option>
             {MOODS.map((m) => (
-              <option key={m.id} value={m.id}>ムード：{m.label}</option>
+              <option key={m.id} value={m.id}>{m.label}</option>
             ))}
           </select>
         </div>

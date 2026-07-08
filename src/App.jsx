@@ -1,8 +1,6 @@
 import { useState, useMemo } from "react";
 import "./App.css";
 import { NOTE_NAMES, MOODS, GENRES } from "./data/musicData.js";
-import { generateSong, generateSectionData } from "./lib/generateProgression.js";
-import { generateStructure } from "./lib/generateStructure.js";
 import { songDurationSeconds, formatDuration } from "./lib/duration.js";
 import { usePlayback } from "./hooks/usePlayback.js";
 import StructureEditor from "./components/StructureEditor.jsx";
@@ -33,7 +31,7 @@ export default function App() {
   const [song, setSong] = useState(null);
   const [copied, setCopied] = useState(false);
 
-  const { playing, cursor, play, stop } = usePlayback();
+  const { playing, playingSection, cursor, speed, setSpeed, play, stop } = usePlayback();
 
   const genre = useMemo(() => GENRES.find((g) => g.id === genreId), [genreId]);
   const mood = useMemo(() => MOODS.find((m) => m.id === moodId), [moodId]);
@@ -52,16 +50,9 @@ export default function App() {
   const durationPreview = formatDuration(songDurationSeconds(totalBars, bpm));
   const keyModeLabel = keyMode === "minor" ? "マイナー" : "メジャー";
 
-  const generate = () => {
-    if (structure.length === 0) return;
-    stop();
-    setSong(generateSong(structure, genre, mood, keyIndex, { keyMode, bpm }));
-    setCopied(false);
-  };
+  const generate = () => {};
 
-  const makeStructure = () => {
-    setStructure(generateStructure(genre, bpm));
-  };
+  const makeStructure = () => {};
 
   const updateChord = (si, bi, newChord) => {
     setSong((prev) => {
@@ -75,30 +66,17 @@ export default function App() {
     });
   };
 
-  const addSection = (type, bars) => {
-    const newSection = { type, bars, moodId: null };
-    setStructure((prev) => [...prev, newSection]);
+  const addSection = () => {};
+
+  const updateSectionSettings = (si, patch) => {
+    setStructure((prev) => prev.map((sec, i) => (i === si ? { ...sec, ...patch } : sec)));
     setSong((prev) => {
       if (!prev) return prev;
-      const sectionData = generateSectionData(newSection, genre, mood, keyIndex, { keyMode });
-      return { ...prev, sections: [...prev.sections, sectionData] };
+      return { ...prev, sections: prev.sections.map((sec, i) => (i === si ? { ...sec, ...patch } : sec)) };
     });
   };
 
-  const regenerateSection = (si) => {
-    setSong((prev) => {
-      if (!prev) return prev;
-      const current = prev.sections[si];
-      const sectionData = generateSectionData(
-        { type: current.type, bars: current.bars, moodId: current.moodId },
-        genre,
-        mood,
-        keyIndex,
-        { keyMode }
-      );
-      return { ...prev, sections: prev.sections.map((sec, i) => (i === si ? sectionData : sec)) };
-    });
-  };
+  const regenerateSection = () => {};
 
   const removeGeneratedSection = (si) => {
     setStructure((prev) => prev.filter((_, i) => i !== si));
@@ -250,7 +228,11 @@ export default function App() {
               song={song}
               cursor={cursor}
               playing={playing}
+              playingSection={playingSection}
+              speed={speed}
+              onChangeSpeed={setSpeed}
               onPlay={() => play(song)}
+              onPlaySection={(si) => (playingSection === si ? stop() : play(song, si))}
               onStop={stop}
               onRegenerate={generate}
               onCopy={copyText}
@@ -260,6 +242,7 @@ export default function App() {
               onRemoveSection={removeGeneratedSection}
               onReorderSections={reorderGeneratedSection}
               onRegenerateSection={regenerateSection}
+              onUpdateSection={updateSectionSettings}
             />
           </div>
         </div>

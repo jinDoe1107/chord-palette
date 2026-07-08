@@ -64,7 +64,8 @@ export function pick(arr, rng) {
    `chord.intervals` (set by chordCatalog for custom/edited chords) takes precedence
    over the legacy minor/ext-derived triad, so any chord quality can be played back. */
 export function chordFrequencies(chord) {
-  const rootMidi = 48 + chord.rootPc; // C3 base
+  const shift = 12 * (chord.octave || 0); // 小節単位のオクターブ変更(±1)
+  const rootMidi = 48 + chord.rootPc + shift; // C3 base
   let intervals = chord.intervals;
   if (!intervals) {
     intervals = chord.minor ? [0, 3, 7] : [0, 4, 7];
@@ -73,7 +74,7 @@ export function chordFrequencies(chord) {
   }
   const midis = intervals.map((i) => rootMidi + i);
   if (chord.bassPc != null && chord.bassPc !== chord.rootPc) {
-    midis.unshift(36 + chord.bassPc); // C2基準のベース音
+    midis.unshift(36 + chord.bassPc + shift); // C2基準のベース音
   }
   return midis.map((m) => 440 * Math.pow(2, (m - 69) / 12));
 }

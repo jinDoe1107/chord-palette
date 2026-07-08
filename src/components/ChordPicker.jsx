@@ -3,7 +3,7 @@ import { NOTE_NAMES } from "../data/musicData.js";
 import { QUALITIES, buildChordForKey } from "../lib/chordCatalog.js";
 import { suggestChords } from "../lib/suggestChords.js";
 
-export default function ChordPicker({ chord, nextChord, keyIndex, keyMode, onSelect, onClose }) {
+export default function ChordPicker({ chord, nextChord, keyIndex, keyMode, onSelect, onClose, style }) {
   const [root, setRoot] = useState(chord.rootPc);
   const [qualityId, setQualityId] = useState(chord.qualityId || (chord.ext === "7" ? "7" : chord.ext === "M7" ? "maj7" : chord.minor ? "min" : "maj"));
   const [bass, setBass] = useState(chord.bassPc ?? -1); // -1 = 指定なし（ルート）
@@ -11,7 +11,7 @@ export default function ChordPicker({ chord, nextChord, keyIndex, keyMode, onSel
   const groups = suggestChords({ keyIndex, keyMode, chord, nextChord });
 
   return (
-    <div className="chord-picker" onClick={(e) => e.stopPropagation()}>
+    <div className="chord-picker" style={style} onClick={(e) => e.stopPropagation()}>
       <div className="chord-picker-head">
         <span>コードを編集</span>
         <button className="x" onClick={onClose} aria-label="閉じる">×</button>
