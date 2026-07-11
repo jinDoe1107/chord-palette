@@ -24,6 +24,10 @@ export function parseToken(token) {
   };
 }
 
+export function isValidToken(token) {
+  return TOKEN_RE.test(token);
+}
+
 export function tokenToChord(token, keyIndex, scale = MAJOR_SCALE) {
   const { degree, flat, minor, ext, bassDegree, bassFlat } = parseToken(token);
   const rootPc = (keyIndex + scale[degree] + (flat ? 11 : 0)) % 12;

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { parseToken, tokenToChord, maybeAddSeventh } from "../chordTheory.js";
+import { parseToken, tokenToChord, maybeAddSeventh, isValidToken } from "../chordTheory.js";
 import { MINOR_SCALE } from "../../data/musicData.js";
 
 describe("parseToken", () => {
@@ -28,6 +28,20 @@ describe("tokenToChord", () => {
   });
   it("maps minor scale degrees", () => {
     expect(tokenToChord("i", 9, MINOR_SCALE).name).toBe("Am");
+  });
+});
+
+describe("isValidToken", () => {
+  it.each([
+    ["IVM7", true],
+    ["bVII7", true],
+    ["IV/V", true],
+    ["iii7", true],
+    ["H7", false],
+    ["sus4", false],
+    ["", false],
+  ])("%j → %s", (token, expected) => {
+    expect(isValidToken(token)).toBe(expected);
   });
 });
 

@@ -5,8 +5,15 @@ import { songDurationSeconds, formatDuration } from "./lib/duration.js";
 import { usePlayback } from "./hooks/usePlayback.js";
 import StructureEditor from "./components/StructureEditor.jsx";
 import LeadSheet from "./components/LeadSheet.jsx";
+import { templateEngine } from "./lib/engine.js";
+import { mulberry32, randomSeed } from "./lib/rng.js";
+import { buildSongSection } from "./lib/generateProgression.js";
+import { buildStandardStructure } from "./lib/structurePreset.js";
 
 const suggestTempo = (genre, mood) => Math.round(genre.tempo * mood.tempoMod);
+
+// 生成エンジン。将来LMエンジン(Transformers.js)追加時はここの束縛を差し替える
+const engine = templateEngine;
 
 function SectionHeader({ label, open, onToggle }) {
   return (
@@ -50,9 +57,26 @@ export default function App() {
   const durationPreview = formatDuration(songDurationSeconds(totalBars, bpm));
   const keyModeLabel = keyMode === "minor" ? "マイナー" : "メジャー";
 
-  const generate = () => {};
+  const runEngine = async (sections, key, tempo) => {
+    if (engine.init) await engine.init(); // テンプレ版はno-op。LMエンジン時にモデルDL+進捗UIを繋ぐ
+    return engine.generate({
+      genreId, moodId, keyIndex: key.keyIndex, keyMode: key.keyMode,
+      bpm: tempo, sections, rng: mulberry32(randomSeed()), // 実行毎に新シード
+    });
+  };
 
-  const makeStructure = () => {};
+  const generate = async () => {
+    if (structure.length === 0) return;
+    stop();
+    const sections = structure.map((s) => ({ type: s.type, bars: s.bars, moodId: s.moodId ?? null, fixedTokens: null }));
+    const tokenSections = await runEngine(sections, { keyIndex, keyMode }, bpm);
+    setSong({
+      genreLabel: genre.label, moodLabel: mood.label, tempo: bpm, keyIndex, keyMode,
+      sections: structure.map((s, i) => buildSongSection(s, tokenSections[i], keyIndex, keyMode)),
+    });
+  };
+
+  const makeStructure = () => setStructure(buildStandardStructure(bpm));
 
   const updateChord = (si, bi, newChord) => {
     setSong((prev) => {
@@ -66,17 +90,48 @@ export default function App() {
     });
   };
 
-  const addSection = () => {};
-
-  const updateSectionSettings = (si, patch) => {
-    setStructure((prev) => prev.map((sec, i) => (i === si ? { ...sec, ...patch } : sec)));
-    setSong((prev) => {
-      if (!prev) return prev;
-      return { ...prev, sections: prev.sections.map((sec, i) => (i === si ? { ...sec, ...patch } : sec)) };
+  const addSection = async (type, bars) => {
+    const newSec = { type, bars, moodId: null };
+    setStructure((prev) => [...prev, newSec]);
+    if (!song) return; // シート未生成なら構成のみ追加
+    stop();
+    const sections = [
+      ...song.sections.map((s) => ({ type: s.type, bars: s.bars, moodId: s.moodId ?? null, fixedTokens: s.tokens ?? null })),
+      { ...newSec, fixedTokens: null },
+    ];
+    const tokenSections = await runEngine(sections, song, song.tempo);
+    setSong((prev) => prev && {
+      ...prev,
+      sections: [...prev.sections, buildSongSection(newSec, tokenSections[tokenSections.length - 1], prev.keyIndex, prev.keyMode)],
     });
   };
 
-  const regenerateSection = () => {};
+  const updateSectionSettings = (si, patch) => {
+    setStructure((prev) => prev.map((sec, i) => (i === si ? { ...sec, ...patch } : sec)));
+    // song側はムード変更時にランプ色(moodAccent)も追随させる
+    const songPatch = "moodId" in patch
+      ? { ...patch, moodAccent: patch.moodId ? (MOODS.find((m) => m.id === patch.moodId)?.accent ?? null) : null }
+      : patch;
+    setSong((prev) => {
+      if (!prev) return prev;
+      return { ...prev, sections: prev.sections.map((sec, i) => (i === si ? { ...sec, ...songPatch } : sec)) };
+    });
+  };
+
+  const regenerateSection = async (si) => {
+    if (!song) return;
+    stop();
+    const sections = song.sections.map((s, i) => ({
+      type: s.type, bars: s.bars, moodId: s.moodId ?? null,
+      fixedTokens: i === si ? null : s.tokens ?? null,
+    }));
+    const tokenSections = await runEngine(sections, song, song.tempo);
+    setSong((prev) => prev && {
+      ...prev,
+      sections: prev.sections.map((sec, i) =>
+        i === si ? buildSongSection(sec, tokenSections[si], prev.keyIndex, prev.keyMode) : sec),
+    });
+  };
 
   const removeGeneratedSection = (si) => {
     setStructure((prev) => prev.filter((_, i) => i !== si));
