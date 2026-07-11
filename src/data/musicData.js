@@ -49,3 +49,6 @@ export const SECTION_TYPES = [
   { id: "breakdown", label: "ブレイクダウン" },
   { id: "outro", label: "アウトロ" },
 ];
+
+/* 「おまかせ曲構成」の目標尺: 1分〜8分を30秒刻みで指定 */
+export const LENGTH_RANGE = { min: 60, max: 480, step: 30, default: 240 };

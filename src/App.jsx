@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import "./App.css";
-import { NOTE_NAMES, MOODS, GENRES } from "./data/musicData.js";
+import { NOTE_NAMES, MOODS, GENRES, LENGTH_RANGE } from "./data/musicData.js";
 import { songDurationSeconds, formatDuration } from "./lib/duration.js";
 import { usePlayback } from "./hooks/usePlayback.js";
 import StructureEditor from "./components/StructureEditor.jsx";
@@ -32,6 +32,7 @@ export default function App() {
   const [keyIndex, setKeyIndex] = useState(0);
   const [keyMode, setKeyMode] = useState("major");
   const [structure, setStructure] = useState([]);
+  const [targetSeconds, setTargetSeconds] = useState(LENGTH_RANGE.default);
   const [open, setOpen] = useState({ genre: true, mood: true, key: true, bpm: true, structure: true });
   const toggleSection = (k) => setOpen((prev) => ({ ...prev, [k]: !prev[k] }));
   const [bpm, setBpm] = useState(() => suggestTempo(GENRES.find((g) => g.id === "jpop"), MOODS.find((m) => m.id === "wistful")));
@@ -76,7 +77,16 @@ export default function App() {
     });
   };
 
-  const makeStructure = () => setStructure(buildStandardStructure(bpm));
+  const makeStructure = () => {
+    setStructure(
+      buildStandardStructure({
+        bpm,
+        genreId,
+        targetSeconds,
+        rng: mulberry32(randomSeed()), // 押すたびに新シード=毎回ランダム
+      })
+    );
+  };
 
   const updateChord = (si, bi, newChord) => {
     setSong((prev) => {
@@ -257,8 +267,26 @@ export default function App() {
             <SectionHeader label="曲構成" open={open.structure} onToggle={() => toggleSection("structure")} />
             {open.structure && (
               <>
+                <div className="row structure-length">
+                  <span className="length-label">長さ</span>
+                  <div className="stepper">
+                    <button
+                      onClick={() => setTargetSeconds((v) => Math.max(LENGTH_RANGE.min, v - LENGTH_RANGE.step))}
+                      aria-label="曲の長さを短くする"
+                    >
+                      −
+                    </button>
+                    <span>{formatDuration(targetSeconds)}</span>
+                    <button
+                      onClick={() => setTargetSeconds((v) => Math.min(LENGTH_RANGE.max, v + LENGTH_RANGE.step))}
+                      aria-label="曲の長さを長くする"
+                    >
+                      ＋
+                    </button>
+                  </div>
+                </div>
                 <button className="make-structure" onClick={makeStructure}>
-                  ✦ 曲構成を作成（約4分・おまかせ）
+                  ✦ 曲構成を作成（{genre.label}・おまかせ）
                 </button>
                 {structure.length === 0 && (
                   <div className="structure-empty">

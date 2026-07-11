@@ -3,3 +3,4 @@ dist
 .DS_Store
 *.local
 docs/guitar-playback-samples.md
+docs/song-structure-rework.md
