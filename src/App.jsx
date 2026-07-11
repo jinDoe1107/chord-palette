@@ -38,7 +38,7 @@ export default function App() {
   const [song, setSong] = useState(null);
   const [copied, setCopied] = useState(false);
 
-  const { playing, playingSection, cursor, speed, setSpeed, play, stop } = usePlayback();
+  const { playing, playingSection, cursor, speed, setSpeed, tone, setTone, play, stop } = usePlayback();
 
   const genre = useMemo(() => GENRES.find((g) => g.id === genreId), [genreId]);
   const mood = useMemo(() => MOODS.find((m) => m.id === moodId), [moodId]);
@@ -286,6 +286,8 @@ export default function App() {
               playingSection={playingSection}
               speed={speed}
               onChangeSpeed={setSpeed}
+              tone={tone}
+              onChangeTone={setTone}
               onPlay={() => play(song)}
               onPlaySection={(si) => (playingSection === si ? stop() : play(song, si))}
               onStop={stop}
@@ -301,6 +303,17 @@ export default function App() {
             />
           </div>
         </div>
+
+        <footer className="credits">
+          ギター音源:{" "}
+          <a href="https://github.com/gleitz/midi-js-soundfonts" target="_blank" rel="noopener noreferrer">
+            FluidR3_GM
+          </a>{" "}
+          by Frank Wen — ライセンス{" "}
+          <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener noreferrer">
+            CC BY 3.0
+          </a>
+        </footer>
       </div>
     </div>
   );

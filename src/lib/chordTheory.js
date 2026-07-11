@@ -64,10 +64,10 @@ export function pick(arr, rng) {
   return arr[Math.floor(rng() * arr.length)];
 }
 
-/* Returns frequencies (Hz) for a chord's notes, for simple synth playback.
+/* Returns the MIDI note numbers for a chord's notes, low to high, for playback.
    `chord.intervals` (set by chordCatalog for custom/edited chords) takes precedence
    over the legacy minor/ext-derived triad, so any chord quality can be played back. */
-export function chordFrequencies(chord) {
+export function chordMidiNotes(chord) {
   const shift = 12 * (chord.octave || 0); // 小節単位のオクターブ変更(±1)
   const rootMidi = 48 + chord.rootPc + shift; // C3 base
   let intervals = chord.intervals;
@@ -80,5 +80,10 @@ export function chordFrequencies(chord) {
   if (chord.bassPc != null && chord.bassPc !== chord.rootPc) {
     midis.unshift(36 + chord.bassPc + shift); // C2基準のベース音
   }
-  return midis.map((m) => 440 * Math.pow(2, (m - 69) / 12));
+  return midis;
+}
+
+/* Returns frequencies (Hz) for a chord's notes, for simple synth playback. */
+export function chordFrequencies(chord) {
+  return chordMidiNotes(chord).map((m) => 440 * Math.pow(2, (m - 69) / 12));
 }

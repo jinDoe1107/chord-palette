@@ -209,6 +209,17 @@ select {
 }
 .combo b { color: #23262b; }
 
+/* ---- Attribution footer (CC BY 3.0 credit for the guitar samples) ---- */
+footer.credits {
+  margin-top: 22px; padding-top: 14px;
+  border-top: 1px solid rgba(237, 230, 214, .12);
+  font-size: 11px; line-height: 1.7; color: #8c8570; text-align: center;
+}
+footer.credits a {
+  color: #c9bfa6; text-decoration: underline; text-underline-offset: 2px;
+}
+footer.credits a:hover { color: var(--acc); }
+
 .sheet { display: flex; flex-direction: column; gap: 16px; }
 
 .empty {

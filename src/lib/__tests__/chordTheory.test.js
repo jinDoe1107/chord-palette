@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { parseToken, tokenToChord, maybeAddSeventh, isValidToken } from "../chordTheory.js";
+import { parseToken, tokenToChord, maybeAddSeventh, isValidToken, chordMidiNotes, chordFrequencies } from "../chordTheory.js";
 import { MINOR_SCALE } from "../../data/musicData.js";
 
 describe("parseToken", () => {
@@ -58,5 +58,41 @@ describe("maybeAddSeventh", () => {
   });
   it("respects probability", () => {
     expect(maybeAddSeventh("I", 0.5, () => 0.9)).toBe("I");
+  });
+});
+
+describe("chordMidiNotes", () => {
+  it.each([
+    ["C major triad", { rootPc: 0, minor: false, ext: "" }, [48, 52, 55]],
+    ["A minor triad", { rootPc: 9, minor: true, ext: "" }, [57, 60, 64]],
+    ["G dominant 7th", { rootPc: 7, minor: false, ext: "7" }, [55, 59, 62, 65]],
+    ["C major 7th", { rootPc: 0, minor: false, ext: "M7" }, [48, 52, 55, 59]],
+  ])("%s", (_label, chord, expected) => {
+    expect(chordMidiNotes(chord)).toEqual(expected);
+  });
+
+  it("prefers explicit intervals over minor/ext", () => {
+    expect(chordMidiNotes({ rootPc: 0, minor: true, intervals: [0, 4, 8] })).toEqual([48, 52, 56]);
+  });
+
+  it("shifts every note by an octave when chord.octave is set", () => {
+    expect(chordMidiNotes({ rootPc: 0, minor: false, ext: "", octave: 1 })).toEqual([60, 64, 67]);
+    expect(chordMidiNotes({ rootPc: 0, minor: false, ext: "", octave: -1 })).toEqual([36, 40, 43]);
+  });
+
+  it("prepends a bass note for slash chords (F/G)", () => {
+    expect(chordMidiNotes({ rootPc: 5, minor: false, ext: "", bassPc: 7 })).toEqual([43, 53, 57, 60]);
+  });
+
+  it("ignores a bass equal to the root", () => {
+    expect(chordMidiNotes({ rootPc: 0, minor: false, ext: "", bassPc: 0 })).toEqual([48, 52, 55]);
+  });
+});
+
+describe("chordFrequencies", () => {
+  it("is chordMidiNotes mapped to Hz (A minor starts at 220Hz)", () => {
+    const freqs = chordFrequencies({ rootPc: 9, minor: true, ext: "" });
+    expect(freqs[0]).toBeCloseTo(220, 5); // MIDI 57 = A3 = 220Hz
+    expect(freqs).toEqual(chordMidiNotes({ rootPc: 9, minor: true, ext: "" }).map((m) => 440 * Math.pow(2, (m - 69) / 12)));
   });
 });
