@@ -93,6 +93,7 @@ export async function generateProgressionWith(req, chooseTemplate) {
     const ctx = {
       mode: req.keyMode, genreId: req.genreId, moodId: effMoodId,
       role: SECTION_ROLES[sec.type] ?? "verse", sectionType: sec.type, bars: sec.bars,
+      ai: sec.ai ?? false, hint: sec.hint ?? null,
       prevEndToken: state.prevEndToken,
       nextStartToken: req.sections[i + 1]?.fixedTokens?.[0] ?? null,
     };
@@ -127,6 +128,8 @@ export function buildSongSection(sec, tokens, keyIndex, keyMode) {
     bars: sec.bars,
     moodId: sec.moodId ?? null,
     moodAccent: moodDef?.accent ?? null,
+    ai: sec.ai ?? false,
+    hint: sec.hint ?? null,
     label: SECTION_TYPES.find((t) => t.id === sec.type)?.label ?? sec.type,
     tokens,
     chords: tokens.map((t) => tokenToChord(t, keyIndex, scale)),

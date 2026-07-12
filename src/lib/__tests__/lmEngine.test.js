@@ -11,7 +11,7 @@ const CANDS = [
 ];
 const ctx = {
   mode: "major", genreId: "jpop", moodId: "wistful", role: "chorus",
-  sectionType: "chorus", bars: 8, prevEndToken: "V7", nextStartToken: null,
+  sectionType: "chorus", bars: 8, ai: true, prevEndToken: "V7", nextStartToken: null,
 };
 const req = (over = {}) => ({
   genreId: "jpop", moodId: "wistful", keyIndex: 0, keyMode: "major", bpm: 120,
@@ -50,6 +50,11 @@ describe("buildSelectionPrompt", () => {
     expect(buildSelectionPrompt(req(), ctx, CANDS)).not.toContain("User request");
     expect(buildSelectionPrompt(req({ hint: "サビは壮大に" }), ctx, CANDS)).toContain("User request (Japanese): サビは壮大に");
   });
+  it("embeds the per-section hint only when present", () => {
+    expect(buildSelectionPrompt(req(), ctx, CANDS)).not.toContain("Request for this section");
+    expect(buildSelectionPrompt(req(), { ...ctx, hint: "静かに始めて" }, CANDS))
+      .toContain("Request for this section (Japanese): 静かに始めて");
+  });
 });
 
 describe("makeLlmChooser", () => {
@@ -62,6 +67,13 @@ describe("makeLlmChooser", () => {
     const spy = async () => { called = true; return []; };
     const chooser = makeLlmChooser(req(), spy);
     expect(await chooser(ctx, [CANDS[0]])).toBe(CANDS[0]);
+    expect(called).toBe(false);
+  });
+  it("skips the model when the section has AI off", async () => {
+    let called = false;
+    const spy = async () => { called = true; return []; };
+    const chooser = makeLlmChooser(req({ rng: mulberry32(4) }), spy);
+    expect(CANDS).toContain(await chooser({ ...ctx, ai: false }, CANDS));
     expect(called).toBe(false);
   });
   it("falls back to a shuffled pick on garbage output", async () => {
@@ -83,10 +95,10 @@ describe("makeLlmChooser", () => {
 describe("generateProgressionWith + llm chooser", () => {
   it("produces valid tokens with correct bar counts end-to-end", async () => {
     const sections = [
-      { type: "a", bars: 8, moodId: null, fixedTokens: null },
-      { type: "b", bars: 8, moodId: null, fixedTokens: null },
-      { type: "chorus", bars: 8, moodId: null, fixedTokens: null },
-      { type: "outro", bars: 4, moodId: null, fixedTokens: null },
+      { type: "a", bars: 8, moodId: null, ai: true, fixedTokens: null },
+      { type: "b", bars: 8, moodId: null, ai: true, fixedTokens: null },
+      { type: "chorus", bars: 8, moodId: null, ai: true, fixedTokens: null },
+      { type: "outro", bars: 4, moodId: null, ai: false, fixedTokens: null }, // AIオフ混在でも成立する
     ];
     const r = req({ sections, rng: mulberry32(3), hint: "明るく" });
     const result = await generateProgressionWith(r, makeLlmChooser(r, fakeGenerator("1")));
@@ -97,5 +109,19 @@ describe("generateProgressionWith + llm chooser", () => {
     });
     expect(result[1].at(-1)).toBe("V7"); // 仕上げ処理も通っている
     expect(result[3].at(-1)).toBe("I");
+  });
+  it("passes per-section hints through to the prompt", async () => {
+    const prompts = [];
+    const gen = async (messages) => {
+      prompts.push(messages[0].content);
+      return [{ generated_text: [...messages, { role: "assistant", content: "1" }] }];
+    };
+    const sections = [
+      { type: "a", bars: 4, moodId: null, ai: true, hint: "静かに始めて", fixedTokens: null },
+      { type: "chorus", bars: 4, moodId: null, ai: false, hint: null, fixedTokens: null },
+    ];
+    const r = req({ sections, rng: mulberry32(3) });
+    await generateProgressionWith(r, makeLlmChooser(r, gen));
+    expect(prompts.some((p) => p.includes("Request for this section (Japanese): 静かに始めて"))).toBe(true);
   });
 });

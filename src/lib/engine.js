@@ -8,6 +8,8 @@ import { lmSelectorEngine } from "./lmEngine.js";
  * @property {string} type            SECTION_TYPESのid
  * @property {number} bars            1..16(1小節1コード)
  * @property {?string} moodId         セクション個別ムード(null=曲全体の設定を使用)
+ * @property {?boolean} [ai]          セクション個別のAIアシスト(true=AIエンジンがLLMで選択。テンプレエンジンは無視)
+ * @property {?string} [hint]         セクション個別のAIヒント(AIエンジン用。テンプレエンジンは無視)
  * @property {?string[]} fixedTokens  非null=このセクションは生成せず維持(前後の文脈として使う)
  *
  * @typedef {Object} EngineRequest

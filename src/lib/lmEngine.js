@@ -3,6 +3,7 @@
    1つ選ばせるだけ=出力は常に既存パイプラインの正当なトークン(構造上壊れない)。
    モデルは初回のみHF Hub CDNからダウンロードされ、ブラウザにキャッシュされる。 */
 import { generateProgressionWith } from "./generateProgression.js";
+import { pick } from "./chordTheory.js";
 import { GENRES, MOODS, NOTE_NAMES } from "../data/musicData.js";
 
 const MODEL_ID = "onnx-community/Qwen2.5-0.5B-Instruct";
@@ -42,6 +43,7 @@ export function buildSelectionPrompt(req, ctx, candidates) {
   ];
   if (ctx.prevEndToken) lines.push(`The previous section ends on: ${ctx.prevEndToken}.`);
   if (req.hint) lines.push(`User request (Japanese): ${req.hint}`);
+  if (ctx.hint) lines.push(`Request for this section (Japanese): ${ctx.hint}`);
   lines.push("Candidates (roman numeral progressions):");
   candidates.forEach((t, i) => lines.push(`${i + 1}. ${t.tokens.join(" ")}`));
   lines.push("Answer with only the number of the best candidate.");
@@ -64,6 +66,7 @@ export function parseSelection(text, count) {
  */
 export function makeLlmChooser(req, generator) {
   return async (ctx, candidates) => {
+    if (!ctx.ai) return pick(candidates, req.rng); // AIオフのセクションは従来のランダム選択
     if (candidates.length === 1) return candidates[0]; // LLM呼び出し不要
     const shuffled = shuffleWithRng(candidates, req.rng); // シード決定的な並び=押すたびに変化
     try {

@@ -51,19 +51,19 @@ export default function StructureEditor({ structure, onChange }) {
               <span>{sec.bars}小節</span>
               <button onClick={() => updateSection(i, { bars: Math.min(16, sec.bars + 1) })} aria-label="小節を増やす">＋</button>
             </div>
+            <select
+              className="mood-override"
+              value={sec.moodId || ""}
+              onChange={(e) => updateSection(i, { moodId: e.target.value || null })}
+              aria-label={`セクション${i + 1}のムード`}
+            >
+              <option value="">ムード：共通</option>
+              {MOODS.map((m) => (
+                <option key={m.id} value={m.id}>{m.label}</option>
+              ))}
+            </select>
             <button className="x" onClick={() => removeSection(i)} aria-label="セクションを削除">×</button>
           </div>
-          <select
-            className="mood-override"
-            value={sec.moodId || ""}
-            onChange={(e) => updateSection(i, { moodId: e.target.value || null })}
-            aria-label={`セクション${i + 1}のムード`}
-          >
-            <option value="">ムード：共通設定を使用</option>
-            {MOODS.map((m) => (
-              <option key={m.id} value={m.id}>{m.label}</option>
-            ))}
-          </select>
         </div>
       ))}
       <button className="add" onClick={addSection}>＋ セクションを追加</button>

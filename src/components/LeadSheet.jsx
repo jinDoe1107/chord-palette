@@ -8,7 +8,7 @@ import ChordPicker from "./ChordPicker.jsx";
 
 const PICKER_WIDTH = 280;
 
-export default function LeadSheet({ song, cursor, playing, playingSection, speed, onChangeSpeed, tone, onChangeTone, onPlay, onPlaySection, onStop, onRegenerate, onCopy, copied, onChangeChord, onAddSection, onRemoveSection, onReorderSections, onRegenerateSection, onUpdateSection }) {
+export default function LeadSheet({ song, aiStatus, aiProgress, hasWebGPU, onToggleSectionAi, cursor, playing, playingSection, speed, onChangeSpeed, tone, onChangeTone, onPlay, onPlaySection, onStop, onRegenerate, onCopy, copied, onChangeChord, onAddSection, onRemoveSection, onReorderSections, onRegenerateSection, onUpdateSection }) {
   const [editing, setEditing] = useState(null); // { section, bar, top, left }
   const [dragIndex, setDragIndex] = useState(null);
   const [newType, setNewType] = useState(SECTION_TYPES[0].id);
@@ -76,6 +76,14 @@ export default function LeadSheet({ song, cursor, playing, playingSection, speed
             <button className="x" onClick={() => onRemoveSection(si)} aria-label={`${section.label}を削除`}>×</button>
           </div>
           <div className="section-meta">
+            <button
+              type="button"
+              className={`sec-ai-toggle ${section.ai ? "on" : ""}`}
+              onClick={() => onToggleSectionAi(si)}
+              aria-pressed={!!section.ai}
+              title="AIアシスト（βテスト機能）。初回はAIモデル（約0.4GB）のダウンロードが必要です"
+              aria-label={`${section.label}のAIアシスト`}
+            >✨ AI</button>
             <select
               className="mood-override"
               value={section.moodId || ""}
@@ -94,6 +102,32 @@ export default function LeadSheet({ song, cursor, playing, playingSection, speed
             </div>
             <span className="sec-time">{formatDuration(songDurationSeconds(section.bars, song.tempo))}</span>
           </div>
+          {section.ai && (
+            <div className="section-ai">
+              <input
+                className="hint-input section-hint"
+                type="text"
+                value={section.hint || ""}
+                maxLength={120}
+                onChange={(e) => onUpdateSection(si, { hint: e.target.value || null })}
+                onKeyDown={(e) => { if (e.key === "Enter") onRegenerateSection(si); }}
+                placeholder="✨ AIへのヒント（Enterでこのセクションを再生成）"
+                aria-label={`${section.label}のAIヒント`}
+              />
+              {aiStatus !== "ready" && aiStatus !== "loading" && aiStatus !== "error" && (
+                <div className="ai-note">βテスト機能・初回はAIモデル（約0.4GB）のダウンロードが必要です</div>
+              )}
+              {aiStatus === "loading" && (
+                <div className="ai-status">βテスト機能・モデルを準備中… {Math.round(aiProgress * 100)}%（初回のみ約0.4GBをダウンロード）</div>
+              )}
+              {aiStatus === "error" && (
+                <div className="ai-status error">モデルの読み込みに失敗しました。オフ→オンで再試行できます</div>
+              )}
+              {aiStatus === "ready" && !hasWebGPU && (
+                <div className="ai-status">WebGPU非対応のため生成に時間がかかることがあります</div>
+              )}
+            </div>
+          )}
           <div className="bars">
             {section.chords.map((c, bi) => {
               const isEditing = editing && editing.section === si && editing.bar === bi;

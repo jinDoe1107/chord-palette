@@ -1,11 +1,12 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import "./App.css";
 import { NOTE_NAMES, MOODS, GENRES, LENGTH_RANGE } from "./data/musicData.js";
 import { songDurationSeconds, formatDuration } from "./lib/duration.js";
 import { usePlayback } from "./hooks/usePlayback.js";
 import StructureEditor from "./components/StructureEditor.jsx";
 import LeadSheet from "./components/LeadSheet.jsx";
-import { ENGINES } from "./lib/engine.js";
+import { templateEngine } from "./lib/engine.js";
+import { lmSelectorEngine } from "./lib/lmEngine.js";
 import { mulberry32, randomSeed } from "./lib/rng.js";
 import { buildSongSection } from "./lib/generateProgression.js";
 import { buildStandardStructure } from "./lib/structurePreset.js";
@@ -16,8 +17,8 @@ function SectionHeader({ label, open, onToggle }) {
   return (
     <h2 className="section-toggle-label">
       <button type="button" className="section-toggle" onClick={onToggle} aria-expanded={open}>
-        <span>{label}</span>
         <span className={`toggle-switch ${open ? "on" : ""}`} aria-hidden="true" />
+        <span>{label}</span>
       </button>
     </h2>
   );
@@ -30,17 +31,15 @@ export default function App() {
   const [keyMode, setKeyMode] = useState("major");
   const [structure, setStructure] = useState([]);
   const [targetSeconds, setTargetSeconds] = useState(LENGTH_RANGE.default);
-  const [open, setOpen] = useState({ genre: true, mood: true, key: true, bpm: true, structure: true, engine: true });
+  const [open, setOpen] = useState({ genre: true, mood: true, key: true, bpm: true, structure: true });
   const toggleSection = (k) => setOpen((prev) => ({ ...prev, [k]: !prev[k] }));
   const [settingsOpen, setSettingsOpen] = useState(true); // 初回は設定モーダルを開いた状態で開始
   const [bpm, setBpm] = useState(() => suggestTempo(GENRES.find((g) => g.id === "jpop"), MOODS.find((m) => m.id === "wistful")));
   const [song, setSong] = useState(null);
   const [copied, setCopied] = useState(false);
-  const [engineId, setEngineId] = useState("template");
-  const [hint, setHint] = useState("");
   const [aiStatus, setAiStatus] = useState("idle"); // idle | loading | ready | error
   const [aiProgress, setAiProgress] = useState(0);
-  const engine = ENGINES.find((e) => e.id === engineId) ?? ENGINES[0];
+  const aiReadyRef = useRef(false);
   const hasWebGPU = typeof navigator !== "undefined" && !!navigator.gpu;
 
   const { playing, playingSection, cursor, speed, setSpeed, tone, setTone, play, stop } = usePlayback();
@@ -77,11 +76,28 @@ export default function App() {
   const durationPreview = formatDuration(songDurationSeconds(totalBars, bpm));
   const keyModeLabel = keyMode === "minor" ? "マイナー" : "メジャー";
 
+  /* AIモデルの準備(冪等)。成功でtrue、失敗はfalse=テンプレへフォールバック */
+  const ensureAiReady = async () => {
+    if (aiReadyRef.current) return true;
+    setAiStatus("loading"); // 初回のみモデルDL(進捗表示)
+    try {
+      await lmSelectorEngine.init((loaded, total) => setAiProgress(total ? loaded / total : 0));
+      aiReadyRef.current = true;
+      setAiStatus("ready");
+      return true;
+    } catch {
+      setAiStatus("error");
+      return false;
+    }
+  };
+
   const runEngine = async (sections, key, tempo) => {
-    if (engine.init) await engine.init(); // 冪等。ロード済みならno-op
+    // AIオンのセクションが生成対象に含まれるときだけAIエンジンを使う(オフのセクションは従来ロジックで選択)
+    const useAi = sections.some((s) => s.ai && !s.fixedTokens);
+    const engine = useAi && (await ensureAiReady()) ? lmSelectorEngine : templateEngine;
     return engine.generate({
       genreId, moodId, keyIndex: key.keyIndex, keyMode: key.keyMode,
-      bpm: tempo, sections, hint: hint.trim() || null,
+      bpm: tempo, sections, hint: null,
       rng: mulberry32(randomSeed()), // 実行毎に新シード
     });
   };
@@ -89,7 +105,7 @@ export default function App() {
   const generate = async () => {
     if (structure.length === 0) return;
     stop();
-    const sections = structure.map((s) => ({ type: s.type, bars: s.bars, moodId: s.moodId ?? null, fixedTokens: null }));
+    const sections = structure.map((s) => ({ type: s.type, bars: s.bars, moodId: s.moodId ?? null, ai: s.ai ?? false, hint: s.hint ?? null, fixedTokens: null }));
     const tokenSections = await runEngine(sections, { keyIndex, keyMode }, bpm);
     setSong({
       genreLabel: genre.label, moodLabel: mood.label, tempo: bpm, keyIndex, keyMode,
@@ -109,20 +125,6 @@ export default function App() {
     );
   };
 
-  const selectEngine = async (id) => {
-    setEngineId(id);
-    const eng = ENGINES.find((e) => e.id === id);
-    if (!eng?.init || aiStatus === "ready" || aiStatus === "loading") return;
-    setAiStatus("loading"); // 初回のみモデルDL(進捗表示)
-    try {
-      await eng.init((loaded, total) => setAiProgress(total ? loaded / total : 0));
-      setAiStatus("ready");
-    } catch {
-      setAiStatus("error");
-      setEngineId("template"); // 失敗時はテンプレートへ戻す
-    }
-  };
-
   const updateChord = (si, bi, newChord) => {
     setSong((prev) => {
       if (!prev) return prev;
@@ -136,12 +138,12 @@ export default function App() {
   };
 
   const addSection = async (type, bars) => {
-    const newSec = { type, bars, moodId: null };
+    const newSec = { type, bars, moodId: null, ai: false, hint: null };
     setStructure((prev) => [...prev, newSec]);
     if (!song) return; // シート未生成なら構成のみ追加
     stop();
     const sections = [
-      ...song.sections.map((s) => ({ type: s.type, bars: s.bars, moodId: s.moodId ?? null, fixedTokens: s.tokens ?? null })),
+      ...song.sections.map((s) => ({ type: s.type, bars: s.bars, moodId: s.moodId ?? null, ai: s.ai ?? false, hint: s.hint ?? null, fixedTokens: s.tokens ?? null })),
       { ...newSec, fixedTokens: null },
     ];
     const tokenSections = await runEngine(sections, song, song.tempo);
@@ -163,11 +165,17 @@ export default function App() {
     });
   };
 
+  const toggleSectionAi = (si) => {
+    const next = !(song?.sections[si]?.ai);
+    updateSectionSettings(si, { ai: next });
+    if (next) ensureAiReady(); // オンにしたら先回りでモデルを準備(冪等)
+  };
+
   const regenerateSection = async (si) => {
     if (!song) return;
     stop();
     const sections = song.sections.map((s, i) => ({
-      type: s.type, bars: s.bars, moodId: s.moodId ?? null,
+      type: s.type, bars: s.bars, moodId: s.moodId ?? null, ai: s.ai ?? false, hint: s.hint ?? null,
       fixedTokens: i === si ? null : s.tokens ?? null,
     }));
     const tokenSections = await runEngine(sections, song, song.tempo);
@@ -230,6 +238,10 @@ export default function App() {
         <div className="sheet">
           <LeadSheet
             song={song}
+            aiStatus={aiStatus}
+            aiProgress={aiProgress}
+            hasWebGPU={hasWebGPU}
+            onToggleSectionAi={toggleSectionAi}
             cursor={cursor}
             playing={playing}
             playingSection={playingSection}
@@ -372,46 +384,7 @@ export default function App() {
               </>
             )}
 
-            <SectionHeader label="生成エンジン" open={open.engine} onToggle={() => toggleSection("engine")} />
-            {open.engine && (
-              <>
-                <div className="chips" role="group" aria-label="生成エンジン選択">
-                  {ENGINES.map((e) => (
-                    <button
-                      key={e.id}
-                      className={`chip ${e.id === engineId ? "genre-on" : ""}`}
-                      onClick={() => selectEngine(e.id)}
-                    >
-                      {e.label}
-                    </button>
-                  ))}
-                </div>
-                {engineId === "lm-selector" && (
-                  <>
-                    <input
-                      className="hint-input"
-                      type="text"
-                      value={hint}
-                      onChange={(e) => setHint(e.target.value)}
-                      maxLength={120}
-                      placeholder="AIへのヒント（例: サビは壮大に）"
-                      aria-label="AIへのヒント"
-                    />
-                    {aiStatus === "loading" && (
-                      <div className="ai-status">モデルを準備中… {Math.round(aiProgress * 100)}%（初回は約0.4GBをダウンロードします）</div>
-                    )}
-                    {aiStatus === "error" && (
-                      <div className="ai-status error">モデルの読み込みに失敗しました。テンプレートに戻しました</div>
-                    )}
-                    {aiStatus === "ready" && !hasWebGPU && (
-                      <div className="ai-status">この環境はWebGPU非対応のため生成に時間がかかることがあります</div>
-                    )}
-                  </>
-                )}
-              </>
-            )}
-
-            <button className="gen" onClick={generate} disabled={structure.length === 0 || (engine.init && aiStatus !== "ready")}>
+            <button className="gen" onClick={generate} disabled={structure.length === 0}>
               コード進行を生成
             </button>
             <div className="combo">
