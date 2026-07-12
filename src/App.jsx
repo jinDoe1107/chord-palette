@@ -306,11 +306,6 @@ export default function App() {
             <SectionHeader label="キー" open={open.key} onToggle={() => toggleSection("key")} />
             {open.key && (
               <div className="row">
-                <select value={keyIndex} onChange={(e) => setKeyIndex(Number(e.target.value))} aria-label="キー">
-                  {NOTE_NAMES.map((n, i) => (
-                    <option key={n} value={i}>{n} {keyModeLabel}</option>
-                  ))}
-                </select>
                 <div className="chips" role="group" aria-label="キーの種類">
                   <button
                     className={`chip ${keyMode === "major" ? "genre-on" : ""}`}
@@ -325,6 +320,11 @@ export default function App() {
                     マイナー
                   </button>
                 </div>
+                <select value={keyIndex} onChange={(e) => setKeyIndex(Number(e.target.value))} aria-label="キー">
+                  {NOTE_NAMES.map((n, i) => (
+                    <option key={n} value={i}>{n} {keyModeLabel}</option>
+                  ))}
+                </select>
               </div>
             )}
 
