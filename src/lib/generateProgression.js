@@ -28,7 +28,8 @@ export function scoreTemplate(tpl, ctx) {
   return score;
 }
 
-export function selectTemplate(ctx, rng, state) {
+/* 採点上位帯(max-2)の候補列挙。直前テンプレ回避も適用。selectTemplateとAI選択器で共用 */
+export function listTemplateCandidates(ctx, state) {
   const pool = PROGRESSION_TEMPLATES.filter((t) => t.mode === ctx.mode); // ハードフィルタはmodeのみ=空にならない
   const scored = pool.map((t) => ({ t, s: scoreTemplate(t, ctx) }));
   const max = Math.max(...scored.map((x) => x.s));
@@ -37,7 +38,11 @@ export function selectTemplate(ctx, rng, state) {
     const filtered = candidates.filter((t) => t.id !== state.prevTemplateId); // 直前セクションと同テンプレ回避
     if (filtered.length > 0) candidates = filtered;
   }
-  return pick(candidates, rng);
+  return candidates;
+}
+
+export function selectTemplate(ctx, rng, state) {
+  return pick(listTemplateCandidates(ctx, state), rng);
 }
 
 /* テンプレをセクション小節数に充填 */
@@ -65,32 +70,33 @@ export function applyFinishing(tokens, type, keyMode) {
 }
 
 /**
- * エンジン本体(engine.jsのProgressionEngine契約の実装)。
- * req = { genreId, moodId, keyIndex, keyMode, bpm, sections, rng }
- * sections[i] = { type, bars, moodId, fixedTokens } — fixedTokens非nullは維持(文脈のみ提供)
- * 戻り値: セクションと同順のトークン配列の配列(result[i].length === sections[i].bars)
+ * 生成パイプライン本体(チューザ注入版)。
+ * chooseTemplate(ctx, candidates) は候補から1テンプレを返す(async可)。
+ * テンプレエンジンは rng で選び、AIアシスト(lmEngine.js)はLLMで選ぶ。
+ * それ以外の req/sections/戻り値の契約は engine.js のとおり。
  * 曲内一貫性: 同一typeのセクションは同じテンプレを再利用(置換は毎回再抽選)=テーマと変奏
  */
-export function generateProgression(req) {
+export async function generateProgressionWith(req, chooseTemplate) {
   const genre = GENRES.find((g) => g.id === req.genreId);
   const results = [];
   const state = { byType: {}, prevTemplateId: null, prevEndToken: null };
-  req.sections.forEach((sec, i) => {
+  for (let i = 0; i < req.sections.length; i++) {
+    const sec = req.sections[i];
     if (sec.fixedTokens) {
       results.push(sec.fixedTokens);
       state.prevEndToken = sec.fixedTokens[sec.fixedTokens.length - 1] ?? null;
       state.prevTemplateId = null;
-      return;
+      continue;
     }
     const effMoodId = sec.moodId ?? req.moodId;
     const mood = MOODS.find((m) => m.id === effMoodId) ?? MOODS.find((m) => m.id === req.moodId);
     const ctx = {
       mode: req.keyMode, genreId: req.genreId, moodId: effMoodId,
-      role: SECTION_ROLES[sec.type] ?? "verse", bars: sec.bars,
+      role: SECTION_ROLES[sec.type] ?? "verse", sectionType: sec.type, bars: sec.bars,
       prevEndToken: state.prevEndToken,
       nextStartToken: req.sections[i + 1]?.fixedTokens?.[0] ?? null,
     };
-    const tpl = state.byType[sec.type] ?? selectTemplate(ctx, req.rng, state);
+    const tpl = state.byType[sec.type] ?? (await chooseTemplate(ctx, listTemplateCandidates(ctx, state)));
     state.byType[sec.type] = tpl;
     state.prevTemplateId = tpl.id;
     let tokens = fitTemplateToBars(tpl.tokens, sec.bars);
@@ -100,8 +106,16 @@ export function generateProgression(req) {
     tokens = applyFinishing(tokens, sec.type, req.keyMode);
     state.prevEndToken = tokens[tokens.length - 1];
     results.push(tokens);
-  });
+  }
   return results;
+}
+
+/**
+ * テンプレエンジンの generate 実装(候補からrngで選ぶ)。
+ * チューザ注入化に伴い Promise を返す。呼び出し側は await すること(engine.js契約どおり)。
+ */
+export function generateProgression(req) {
+  return generateProgressionWith(req, (ctx, candidates) => pick(candidates, req.rng));
 }
 
 /* トークン列 → songのsectionオブジェクト(LeadSheetが消費する形+新設tokens) */

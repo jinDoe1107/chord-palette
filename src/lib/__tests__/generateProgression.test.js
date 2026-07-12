@@ -60,8 +60,8 @@ describe("selectTemplate", () => {
 describe("generateProgression", () => {
   const structure = [sec("intro", 4), sec("a", 8), sec("b", 8), sec("chorus", 8), sec("outro", 4)];
 
-  it("fills every section with valid tokens and honours finishing rules (major)", () => {
-    const result = generateProgression(req({ sections: structure, rng: mulberry32(7) }));
+  it("fills every section with valid tokens and honours finishing rules (major)", async () => {
+    const result = await generateProgression(req({ sections: structure, rng: mulberry32(7) }));
     expect(result).toHaveLength(structure.length);
     result.forEach((tokens, i) => {
       expect(tokens).toHaveLength(structure[i].bars);
@@ -71,15 +71,15 @@ describe("generateProgression", () => {
     expect(result[4].at(-1)).toBe("I"); // アウトロ
   });
 
-  it("is reproducible for a given seed", () => {
-    const a = generateProgression(req({ sections: structure, rng: mulberry32(7) }));
-    const b = generateProgression(req({ sections: structure, rng: mulberry32(7) }));
+  it("is reproducible for a given seed", async () => {
+    const a = await generateProgression(req({ sections: structure, rng: mulberry32(7) }));
+    const b = await generateProgression(req({ sections: structure, rng: mulberry32(7) }));
     expect(a).toEqual(b);
   });
 
-  it("supports minor keys (metal × aggressive)", () => {
+  it("supports minor keys (metal × aggressive)", async () => {
     const sections = [sec("a", 8), sec("b", 8), sec("chorus", 8), sec("outro", 4)];
-    const result = generateProgression(req({
+    const result = await generateProgression(req({
       genreId: "metal", moodId: "aggressive", keyIndex: 9, keyMode: "minor",
       sections, rng: mulberry32(11),
     }));
@@ -88,10 +88,10 @@ describe("generateProgression", () => {
     expect(result[3].at(-1)).toBe("i");
   });
 
-  it("echoes fixed sections without consuming randomness", () => {
+  it("echoes fixed sections without consuming randomness", async () => {
     const fixedA = ["I", "V", "vi", "IV"];
     const fixedB = ["IV", "V", "I", "I"];
-    const result = generateProgression(req({
+    const result = await generateProgression(req({
       sections: [
         { type: "a", bars: 4, moodId: null, fixedTokens: fixedA },
         { type: "outro", bars: 4, moodId: null, fixedTokens: fixedB },
@@ -101,9 +101,9 @@ describe("generateProgression", () => {
     expect(result).toEqual([fixedA, fixedB]);
   });
 
-  it("reuses the same template for repeated section types (theme and variation)", () => {
+  it("reuses the same template for repeated section types (theme and variation)", async () => {
     const noSub = () => 0.99; // 置換・7th付加のロールが全て外れる値
-    const result = generateProgression(req({
+    const result = await generateProgression(req({
       genreId: "jpop", moodId: "bright",
       sections: [sec("chorus", 8), sec("a", 8), sec("chorus", 8)],
       rng: noSub,

@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { buildStandardStructure } from "../structurePreset.js";
 import { songDurationSeconds } from "../duration.js";
-import { SECTION_TYPES, LENGTH_RANGE } from "../../data/musicData.js";
+import { SECTION_TYPES, LENGTH_RANGE, GENRES } from "../../data/musicData.js";
 import { mulberry32 } from "../rng.js";
 import { GENRE_FAMILY } from "../../data/structureRecipes.js";
 
@@ -22,6 +22,10 @@ function assertValidShape(structure) {
 }
 
 describe("buildStandardStructure", () => {
+  it("every genre has an explicit family (no silent jpop fallback)", () => {
+    GENRES.forEach((g) => expect(GENRE_FAMILY[g.id], `missing family for ${g.id}`).toBeDefined());
+  });
+
   it("valid shape & roughly on-target across genres/lengths/seeds", () => {
     for (const genreId of GENRE_IDS) {
       for (const targetSeconds of SAMPLE_LENGTHS) {

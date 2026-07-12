@@ -1,13 +1,14 @@
 /* ジャンル→構成ファミリーの対応。未定義は "jpop" にフォールバック */
 export const GENRE_FAMILY = {
-  jpop: "jpop", anison: "jpop",
-  rock: "rock", punk: "rock",
-  ballad: "ballad",
+  jpop: "jpop", anison: "jpop", kpop: "jpop",
+  rock: "rock", punk: "rock", emo: "rock", country: "rock",
+  ballad: "ballad", folk: "ballad",
   citypop: "groove", lofi: "groove", rnb: "groove",
-  edm: "edm",
+  soul: "groove", neosoul: "groove", funk: "groove", hiphop: "groove",
+  edm: "edm", dubstep: "edm", futurebass: "edm",
   jazz: "jazz", bossa: "jazz",
   blues: "blues",
-  metal: "metal", metalcore: "metal",
+  metal: "metal", metalcore: "metal", posthardcore: "metal",
 };
 
 /*

@@ -4,3 +4,7 @@ dist
 *.local
 docs/guitar-playback-samples.md
 docs/song-structure-rework.md
+docs/llm-engine-study.md
+docs/llm-selector-implementation.md
+docs/genre-list-expansion.md
+docs/mood-list-rework.md

@@ -26,14 +26,16 @@ export const SUB_RULES = [
 
 /* ムード×ジャンル → 置換確率と許可Tier */
 const MOOD_SPICE = {
-  bright: { prob: 0.15, maxTier: 1 }, happy: { prob: 0.15, maxTier: 1 },
-  wistful: { prob: 0.2, maxTier: 2 }, emo: { prob: 0.25, maxTier: 2 },
-  calm: { prob: 0.15, maxTier: 2 }, aggressive: { prob: 0.2, maxTier: 2 },
-  dark: { prob: 0.25, maxTier: 2 }, epic: { prob: 0.2, maxTier: 2 },
-  chic: { prob: 0.35, maxTier: 3 }, dreamy: { prob: 0.3, maxTier: 3 },
+  bright: { prob: 0.15, maxTier: 1 }, sad: { prob: 0.2, maxTier: 2 },
+  wistful: { prob: 0.2, maxTier: 2 }, chic: { prob: 0.35, maxTier: 3 },
+  aggressive: { prob: 0.2, maxTier: 2 }, calm: { prob: 0.15, maxTier: 2 },
+  emo: { prob: 0.25, maxTier: 2 }, dark: { prob: 0.25, maxTier: 2 },
+  nostalgic: { prob: 0.3, maxTier: 2 }, speedy: { prob: 0.15, maxTier: 1 },
+  romantic: { prob: 0.3, maxTier: 3 }, mysterious: { prob: 0.3, maxTier: 3 },
+  hopeful: { prob: 0.15, maxTier: 2 },
 };
-const JAZZY_GENRES = ["jazz", "bossa", "citypop", "lofi", "rnb"];
-const HARD_GENRES = ["metal", "metalcore", "punk", "edm"];
+const JAZZY_GENRES = ["jazz", "bossa", "citypop", "lofi", "rnb", "soul", "neosoul", "funk"];
+const HARD_GENRES = ["metal", "metalcore", "punk", "edm", "dubstep", "posthardcore"];
 
 export function getSpice(genreId, moodId) {
   const base = MOOD_SPICE[moodId] ?? { prob: 0.2, maxTier: 2 };

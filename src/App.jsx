@@ -5,15 +5,12 @@ import { songDurationSeconds, formatDuration } from "./lib/duration.js";
 import { usePlayback } from "./hooks/usePlayback.js";
 import StructureEditor from "./components/StructureEditor.jsx";
 import LeadSheet from "./components/LeadSheet.jsx";
-import { templateEngine } from "./lib/engine.js";
+import { ENGINES } from "./lib/engine.js";
 import { mulberry32, randomSeed } from "./lib/rng.js";
 import { buildSongSection } from "./lib/generateProgression.js";
 import { buildStandardStructure } from "./lib/structurePreset.js";
 
 const suggestTempo = (genre, mood) => Math.round(genre.tempo * mood.tempoMod);
-
-// 生成エンジン。将来LMエンジン(Transformers.js)追加時はここの束縛を差し替える
-const engine = templateEngine;
 
 function SectionHeader({ label, open, onToggle }) {
   return (
@@ -33,11 +30,17 @@ export default function App() {
   const [keyMode, setKeyMode] = useState("major");
   const [structure, setStructure] = useState([]);
   const [targetSeconds, setTargetSeconds] = useState(LENGTH_RANGE.default);
-  const [open, setOpen] = useState({ genre: true, mood: true, key: true, bpm: true, structure: true });
+  const [open, setOpen] = useState({ genre: true, mood: true, key: true, bpm: true, structure: true, engine: true });
   const toggleSection = (k) => setOpen((prev) => ({ ...prev, [k]: !prev[k] }));
   const [bpm, setBpm] = useState(() => suggestTempo(GENRES.find((g) => g.id === "jpop"), MOODS.find((m) => m.id === "wistful")));
   const [song, setSong] = useState(null);
   const [copied, setCopied] = useState(false);
+  const [engineId, setEngineId] = useState("template");
+  const [hint, setHint] = useState("");
+  const [aiStatus, setAiStatus] = useState("idle"); // idle | loading | ready | error
+  const [aiProgress, setAiProgress] = useState(0);
+  const engine = ENGINES.find((e) => e.id === engineId) ?? ENGINES[0];
+  const hasWebGPU = typeof navigator !== "undefined" && !!navigator.gpu;
 
   const { playing, playingSection, cursor, speed, setSpeed, tone, setTone, play, stop } = usePlayback();
 
@@ -59,10 +62,11 @@ export default function App() {
   const keyModeLabel = keyMode === "minor" ? "マイナー" : "メジャー";
 
   const runEngine = async (sections, key, tempo) => {
-    if (engine.init) await engine.init(); // テンプレ版はno-op。LMエンジン時にモデルDL+進捗UIを繋ぐ
+    if (engine.init) await engine.init(); // 冪等。ロード済みならno-op
     return engine.generate({
       genreId, moodId, keyIndex: key.keyIndex, keyMode: key.keyMode,
-      bpm: tempo, sections, rng: mulberry32(randomSeed()), // 実行毎に新シード
+      bpm: tempo, sections, hint: hint.trim() || null,
+      rng: mulberry32(randomSeed()), // 実行毎に新シード
     });
   };
 
@@ -86,6 +90,20 @@ export default function App() {
         rng: mulberry32(randomSeed()), // 押すたびに新シード=毎回ランダム
       })
     );
+  };
+
+  const selectEngine = async (id) => {
+    setEngineId(id);
+    const eng = ENGINES.find((e) => e.id === id);
+    if (!eng?.init || aiStatus === "ready" || aiStatus === "loading") return;
+    setAiStatus("loading"); // 初回のみモデルDL(進捗表示)
+    try {
+      await eng.init((loaded, total) => setAiProgress(total ? loaded / total : 0));
+      setAiStatus("ready");
+    } catch {
+      setAiStatus("error");
+      setEngineId("template"); // 失敗時はテンプレートへ戻す
+    }
   };
 
   const updateChord = (si, bi, newChord) => {
@@ -297,7 +315,46 @@ export default function App() {
               </>
             )}
 
-            <button className="gen" onClick={generate} disabled={structure.length === 0}>
+            <SectionHeader label="生成エンジン" open={open.engine} onToggle={() => toggleSection("engine")} />
+            {open.engine && (
+              <>
+                <div className="chips" role="group" aria-label="生成エンジン選択">
+                  {ENGINES.map((e) => (
+                    <button
+                      key={e.id}
+                      className={`chip ${e.id === engineId ? "genre-on" : ""}`}
+                      onClick={() => selectEngine(e.id)}
+                    >
+                      {e.label}
+                    </button>
+                  ))}
+                </div>
+                {engineId === "lm-selector" && (
+                  <>
+                    <input
+                      className="hint-input"
+                      type="text"
+                      value={hint}
+                      onChange={(e) => setHint(e.target.value)}
+                      maxLength={120}
+                      placeholder="AIへのヒント（例: サビは壮大に）"
+                      aria-label="AIへのヒント"
+                    />
+                    {aiStatus === "loading" && (
+                      <div className="ai-status">モデルを準備中… {Math.round(aiProgress * 100)}%（初回は約0.4GBをダウンロードします）</div>
+                    )}
+                    {aiStatus === "error" && (
+                      <div className="ai-status error">モデルの読み込みに失敗しました。テンプレートに戻しました</div>
+                    )}
+                    {aiStatus === "ready" && !hasWebGPU && (
+                      <div className="ai-status">この環境はWebGPU非対応のため生成に時間がかかることがあります</div>
+                    )}
+                  </>
+                )}
+              </>
+            )}
+
+            <button className="gen" onClick={generate} disabled={structure.length === 0 || (engine.init && aiStatus !== "ready")}>
               コード進行を生成
             </button>
             <div className="combo">

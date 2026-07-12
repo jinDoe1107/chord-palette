@@ -1,8 +1,8 @@
 import { generateProgression } from "./generateProgression.js";
+import { lmSelectorEngine } from "./lmEngine.js";
 
 /**
- * 生成エンジンの契約。将来 Transformers.js(ONNX Runtime Web)のLMエンジンを
- * 同じ契約で実装し、App.jsx の `const engine = templateEngine;` を差し替えるだけで載せ替え可能にする。
+ * 生成エンジンの契約。App.jsx は ENGINES から選んだエンジンを使う。
  *
  * @typedef {Object} EngineSection
  * @property {string} type            SECTION_TYPESのid
@@ -16,6 +16,7 @@ import { generateProgression } from "./generateProgression.js";
  * @property {number} keyIndex        0..11(テンプレエンジンはキー非依存だがLMは使ってよい)
  * @property {"major"|"minor"} keyMode
  * @property {number} bpm
+ * @property {?string} [hint]         自由記述ヒント(AIエンジン用。テンプレエンジンは無視)
  * @property {EngineSection[]} sections
  * @property {() => number} rng       唯一の乱数源(シード済み)
  *
@@ -33,5 +34,8 @@ import { generateProgression } from "./generateProgression.js";
 export const templateEngine = {
   id: "template",
   label: "テンプレート",
-  generate: generateProgression, // 同期実装だが契約上は Promise も可
+  generate: generateProgression,
 };
+
+/** UIに提示するエンジン一覧 */
+export const ENGINES = [templateEngine, lmSelectorEngine];

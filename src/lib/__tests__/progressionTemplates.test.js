@@ -29,6 +29,15 @@ describe("PROGRESSION_TEMPLATES", () => {
     (tpl.genres ?? []).forEach((g) => expect(GENRE_IDS.has(g), `unknown genre ${g}`).toBe(true));
   });
 
+  it("every mood appears in at least one template", () => {
+    const used = new Set(PROGRESSION_TEMPLATES.flatMap((t) => t.moods));
+    MOODS.forEach((m) => expect(used.has(m.id), `mood ${m.id} unused`).toBe(true));
+  });
+
+  it("every genre has family tags", () => {
+    GENRES.forEach((g) => expect(GENRE_FAMILIES[g.id], `missing tags for ${g.id}`).toBeDefined());
+  });
+
   it("reaches every genre in both modes via genres or family tags", () => {
     for (const mode of ["major", "minor"]) {
       for (const g of GENRES) {
