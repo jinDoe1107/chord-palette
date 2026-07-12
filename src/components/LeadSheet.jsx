@@ -17,7 +17,7 @@ export default function LeadSheet({ song, cursor, playing, playingSection, speed
   if (!song) {
     return (
       <div className="empty">
-        ジャンルとムードを掛け合わせて<br />
+        「⚙ 設定」でジャンル・ムード・曲構成を選び<br />
         「コード進行を生成」を押すと、ここにリードシートが表示されます
       </div>
     );

@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import "./App.css";
 import { NOTE_NAMES, MOODS, GENRES, LENGTH_RANGE } from "./data/musicData.js";
 import { songDurationSeconds, formatDuration } from "./lib/duration.js";
@@ -32,6 +32,7 @@ export default function App() {
   const [targetSeconds, setTargetSeconds] = useState(LENGTH_RANGE.default);
   const [open, setOpen] = useState({ genre: true, mood: true, key: true, bpm: true, structure: true, engine: true });
   const toggleSection = (k) => setOpen((prev) => ({ ...prev, [k]: !prev[k] }));
+  const [settingsOpen, setSettingsOpen] = useState(true); // 初回は設定モーダルを開いた状態で開始
   const [bpm, setBpm] = useState(() => suggestTempo(GENRES.find((g) => g.id === "jpop"), MOODS.find((m) => m.id === "wistful")));
   const [song, setSong] = useState(null);
   const [copied, setCopied] = useState(false);
@@ -43,6 +44,21 @@ export default function App() {
   const hasWebGPU = typeof navigator !== "undefined" && !!navigator.gpu;
 
   const { playing, playingSection, cursor, speed, setSpeed, tone, setTone, play, stop } = usePlayback();
+
+  // モーダル表示中: Escapeで閉じる + 背景スクロールをロック
+  useEffect(() => {
+    if (!settingsOpen) return;
+    const onKey = (e) => {
+      if (e.key === "Escape") setSettingsOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [settingsOpen]);
 
   const genre = useMemo(() => GENRES.find((g) => g.id === genreId), [genreId]);
   const mood = useMemo(() => MOODS.find((m) => m.id === moodId), [moodId]);
@@ -79,6 +95,7 @@ export default function App() {
       genreLabel: genre.label, moodLabel: mood.label, tempo: bpm, keyIndex, keyMode,
       sections: structure.map((s, i) => buildSongSection(s, tokenSections[i], keyIndex, keyMode)),
     });
+    setSettingsOpen(false); // 生成できたらモーダルを閉じてシートを見せる
   };
 
   const makeStructure = () => {
@@ -200,9 +217,49 @@ export default function App() {
           <div className="tag">ジャンル × ムードで作るコード進行</div>
         </header>
 
-        <div className="grid">
-          {/* Controls */}
-          <div className="panel">
+        <div className="settings-bar">
+          <button className="tool" onClick={() => setSettingsOpen(true)} aria-haspopup="dialog">
+            ⚙ 設定
+          </button>
+          <div className="combo">
+            <b>{genre.label}</b> × <b>{mood.label}</b> ・ {NOTE_NAMES[keyIndex]}{keyModeLabel} ・ ♩={bpm}
+          </div>
+        </div>
+
+        {/* Sheet */}
+        <div className="sheet">
+          <LeadSheet
+            song={song}
+            cursor={cursor}
+            playing={playing}
+            playingSection={playingSection}
+            speed={speed}
+            onChangeSpeed={setSpeed}
+            tone={tone}
+            onChangeTone={setTone}
+            onPlay={() => play(song)}
+            onPlaySection={(si) => (playingSection === si ? stop() : play(song, si))}
+            onStop={stop}
+            onRegenerate={generate}
+            onCopy={copyText}
+            copied={copied}
+            onChangeChord={updateChord}
+            onAddSection={addSection}
+            onRemoveSection={removeGeneratedSection}
+            onReorderSections={reorderGeneratedSection}
+            onRegenerateSection={regenerateSection}
+            onUpdateSection={updateSectionSettings}
+          />
+        </div>
+
+        {/* Settings modal */}
+        {settingsOpen && <div className="modal-backdrop" onClick={() => setSettingsOpen(false)} />}
+        {settingsOpen && (
+          <div className="panel settings-modal" role="dialog" aria-modal="true" aria-label="設定">
+            <div className="settings-modal-head">
+              <span className="settings-modal-title">設定</span>
+              <button className="x" onClick={() => setSettingsOpen(false)} aria-label="設定を閉じる">×</button>
+            </div>
             <SectionHeader label="ジャンル" open={open.genre} onToggle={() => toggleSection("genre")} />
             {open.genre && (
               <div className="chips" role="group" aria-label="ジャンル選択">
@@ -361,33 +418,7 @@ export default function App() {
               <b>{genre.label}</b> × <b>{mood.label}</b> ・ {NOTE_NAMES[keyIndex]}{keyModeLabel} ・ ♩={bpm}
             </div>
           </div>
-
-          {/* Sheet */}
-          <div className="sheet">
-            <LeadSheet
-              song={song}
-              cursor={cursor}
-              playing={playing}
-              playingSection={playingSection}
-              speed={speed}
-              onChangeSpeed={setSpeed}
-              tone={tone}
-              onChangeTone={setTone}
-              onPlay={() => play(song)}
-              onPlaySection={(si) => (playingSection === si ? stop() : play(song, si))}
-              onStop={stop}
-              onRegenerate={generate}
-              onCopy={copyText}
-              copied={copied}
-              onChangeChord={updateChord}
-              onAddSection={addSection}
-              onRemoveSection={removeGeneratedSection}
-              onReorderSections={reorderGeneratedSection}
-              onRegenerateSection={regenerateSection}
-              onUpdateSection={updateSectionSettings}
-            />
-          </div>
-        </div>
+        )}
 
         <footer className="credits">
           ギター音源:{" "}

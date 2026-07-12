@@ -8,7 +8,7 @@
   - `src/data/structureRecipes.js` — `GENRE_FAMILY` / `FAMILY_RECIPES`(曲構成レシピ)
 - **注意**: このドキュメントは手動生成。上記データを変更した際は本ファイルも更新すること。
 
-## 1. コード進行テンプレート一覧(全96件)
+## 1. コード進行テンプレート一覧(全200件)
 
 | 名称 (id) | 小節数 | モード | ジャンル | タグ | ムード | 役割 | コード進行 |
 |---|---|---|---|---|---|---|---|
@@ -72,6 +72,46 @@
 | 王道進行(サブドミナントマイナー) (royal-road-sdm) | 4 | メジャー | J-POP, シティポップ, アニソン | pop, jazzy | 切ない, ロマンチック, 悲しい | サビ, Bメロ, Aメロ | IVM7 - iv7 - iii7 - vi7 |
 | モダンポップ・ループ (modern-pop-loop) | 4 | メジャー | K-POP, J-POP, EDM | pop, loop | 明るい, おしゃれ, 前向き | Aメロ, サビ | I - V - ii7 - IV |
 | ドッペルドミナント (dominant-approach) | 4 | メジャー | ジャズ, カントリー, ブルース | jazzy, blues, pop | 明るい, おしゃれ, 懐かしい | Bメロ, アウトロ, ソロ・間奏 | II7 - V7 - I - I |
+| アクシス・ターン (axis-turn) | 4 | メジャー | J-POP, K-POP, EDM | pop, loop | 明るい, エモい, 前向き | サビ, Aメロ | V - vi - IV - I |
+| ジェントル・ディセント (gentle-descent) | 4 | メジャー | バラード, フォーク, J-POP | soft, pop | 落ち着いた, 切ない, ロマンチック | Aメロ, イントロ | I - iii - vi - IV |
+| レトロ・ツー(II7) (beatles-two) | 4 | メジャー | ロック, カントリー, フォーク | rock, pop, blues | 明るい, 懐かしい, 前向き | Aメロ, サビ | I - II7 - IV - I |
+| クリープ・アーク (creep-arc) | 4 | メジャー | ロック, エモ, バラード | rock, soft, pop | 切ない, 悲しい, エモい, ミステリアス | Aメロ, サビ | I - III7 - IV - iv |
+| アイスクリーム・チェンジ (ice-cream-changes) | 4 | メジャー | ジャズ, ソウル, J-POP | pop, jazzy, soft | 懐かしい, 明るい, ロマンチック | Aメロ, イントロ, ソロ・間奏 | I - vi - ii7 - V7 |
+| ダイアトニック・ステアズ (diatonic-stairs) | 4 | メジャー | ネオソウル, R&B, lo-fi hip hop | jazzy, soul | 落ち着いた, おしゃれ, 前向き | イントロ, Aメロ, Bメロ | IM7 - ii7 - iii7 - IVM7 |
+| ポップ・アーチ (pop-arch) | 4 | メジャー | J-POP, K-POP, アニソン | pop | 明るい, 前向き, エモい | Aメロ, サビ | I - IV - vi - V |
+| モーダル・リフト (modal-lift) | 4 | メジャー | ロック, カントリー, パンク | rock, pop | 前向き, 明るい, 疾走感 | サビ, Bメロ | I - bVII - IV - V |
+| 王道進行(III7) (royal-road-dominant) | 4 | メジャー | J-POP, アニソン | pop | エモい, 切ない, 疾走感 | サビ, Bメロ | IV - V - III7 - vi |
+| 偽終止プッシュ (deceptive-push) | 4 | メジャー | J-POP, アニソン, EDM | pop, loop | エモい, 切ない, 前向き | Bメロ, サビ | IV - V - vi - vi |
+| シルキー・ステップス (silky-steps) | 4 | メジャー | ネオソウル, シティポップ, R&B | soul, jazzy | ロマンチック, おしゃれ, 落ち着いた | Aメロ, サビ | IM7 - IVM7 - iii7 - vi7 |
+| ドミナント・ペダル (dominant-pedal) | 2 | メジャー | ジャズ, ソウル, シティポップ | jazzy, soul | おしゃれ, ミステリアス | イントロ, Bメロ | IV/V - V7 |
+| 1-4-2-5ターン (two-four-turn) | 4 | メジャー | J-POP, フォーク, ソウル | pop, soft, jazzy | 明るい, 落ち着いた, 懐かしい | Aメロ, イントロ, アウトロ | I - IV - ii7 - V7 |
+| ダイアトニック・サークル(3-6-2-5) (diatonic-circle) | 4 | メジャー | ジャズ, ボサノバ, シティポップ | jazzy | おしゃれ, 落ち着いた, 懐かしい | Aメロ, ソロ・間奏, イントロ | iii7 - vi7 - ii7 - V7 |
+| 借用ループ(bVI-bVII) (borrowed-loop) | 4 | メジャー | ロック, メタル, EDM | rock, heavy, loop | ダーク, 前向き, 怒り | サビ, ソロ・間奏, ブレイクダウン | I - bVI - bVII - I |
+| イージー・ループ (easy-loop) | 4 | メジャー | J-POP, フォーク, カントリー | pop, soft, loop | 明るい, 落ち着いた, 前向き | Aメロ, イントロ | I - V - vi - V |
+| 12小節ブルース(クイックチェンジ) (blues-12-quick) | 12 | メジャー | ブルース, ロック, カントリー | blues | 明るい, 怒り, 懐かしい | Aメロ, ソロ・間奏, サビ | I7 - IV7 - I7 - I7 - IV7 - IV7 - I7 - I7 - V7 - IV7 - I7 - V7 |
+| ソフト・サイクル (soft-cycle) | 4 | メジャー | バラード, J-POP, フォーク | soft, pop | 切ない, 落ち着いた, 懐かしい | Aメロ, Bメロ | I - vi - iii - IV |
+| ビタースイート・アーク (bittersweet-arc) | 4 | メジャー | J-POP, バラード, シティポップ | pop, soft, jazzy | 切ない, 悲しい, ロマンチック | Aメロ, サビ, アウトロ | I - iii - IV - iv |
+| 4-5-1-6ループ (four-five-one-six) | 4 | メジャー | J-POP, アニソン, K-POP | pop, loop | エモい, 明るい, 切ない | サビ, Bメロ | IV - V - I - vi |
+| 2-5-3-6(ダイアトニック) (two-five-three-six) | 4 | メジャー | J-POP, シティポップ, ジャズ | pop, jazzy | おしゃれ, 切ない, 落ち着いた | Aメロ, Bメロ | ii7 - V7 - iii7 - vi7 |
+| 2-5-3-6(VI7) (jpop-turnaround-loop) | 4 | メジャー | J-POP, アニソン, シティポップ | pop, jazzy | エモい, おしゃれ, 切ない | Bメロ, サビ, Aメロ | ii7 - V7 - iii7 - VI7 |
+| グランド・アセント(8小節) (grand-ascent-8) | 8 | メジャー | J-POP, アニソン, バラード | pop, soft | 前向き, 明るい, エモい | サビ, Cメロ・ブリッジ | I - ii7 - iii7 - IV - V - vi - V7 - I |
+| ヘヴィ・ヴァンプ (heavy-vamp) | 2 | メジャー | メタル, ロック, ダブステップ | heavy, rock, loop | 怒り, ダーク | イントロ, ブレイクダウン, ソロ・間奏 | I - bIII |
+| フル・ケーデンス (full-cadence) | 4 | メジャー | フォーク, カントリー, パンク | pop, soft, rock, blues | 明るい, 落ち着いた, 懐かしい | Aメロ, アウトロ, イントロ | I - IV - V - I |
+| ロックンロール・ターン (rock-n-roll-turn) | 4 | メジャー | ロック, パンク, ブルース | rock, blues, loop | 明るい, 疾走感, 懐かしい | Aメロ, サビ, ソロ・間奏 | I - V - IV - I |
+| ミクソリディアン・ケーデンス (mixo-cadence) | 4 | メジャー | ロック, カントリー, フォーク | rock, pop, blues | 懐かしい, 明るい, 落ち着いた | アウトロ, Aメロ | I - IV - bVII - I |
+| アンセム・リゾルブ(8小節) (anthem-resolve-8) | 8 | メジャー | J-POP, ロック, EDM | pop, rock | 前向き, エモい, 明るい | サビ, アウトロ | I - V - vi - IV - ii7 - V7 - I - I |
+| メロウ・サイクル (mellow-cycle) | 4 | メジャー | シティポップ, lo-fi hip hop, ボサノバ | jazzy, soul, soft | 落ち着いた, おしゃれ, ロマンチック | Aメロ, イントロ | IM7 - iii7 - vi7 - V7 |
+| サブドミナントマイナー終止 (minor-plagal-cadence) | 4 | メジャー | バラード, ジャズ, アニソン | soft, pop, jazzy | 悲しい, 切ない, 前向き | アウトロ, Bメロ | iv - V7 - I - I |
+| フリジアン・メジャーヴァンプ (phrygian-major-vamp) | 2 | メジャー | メタル, メタルコア, ダブステップ | heavy, loop | 怒り, ダーク, ミステリアス | イントロ, ブレイクダウン | I - bII |
+| アリーナ・ビルド(8小節) (arena-build-8) | 8 | メジャー | ロック, メタル, エモ | rock, heavy, pop | 前向き, 怒り, 疾走感 | Aメロ, Bメロ | I - I - IV - IV - vi - vi - IV - V |
+| セブンス・ヴァンプ (seventh-vamp) | 2 | メジャー | ファンク, ブルース, ロック | blues, soul, loop | 明るい, 怒り, おしゃれ | イントロ, Aメロ, ソロ・間奏 | I7 - IV7 |
+| サブドミナントマイナー・プッシュ (sdm-push) | 4 | メジャー | J-POP, バラード, シティポップ | pop, soft, jazzy | 切ない, 悲しい, エモい | Bメロ | ii7 - iv - V7 - V7 |
+| デイブレイク・ケーデンス (daybreak-cadence) | 4 | メジャー | ボサノバ, ジャズ, フォーク | jazzy, soft | 明るい, 落ち着いた, 前向き | Aメロ, イントロ, アウトロ | IM7 - IVM7 - V7 - IM7 |
+| ツーコード・リフト (two-chord-lift) | 2 | メジャー | ネオソウル, R&B, ヒップホップ | soul, jazzy, loop | おしゃれ, 落ち着いた, ロマンチック | イントロ, Aメロ, ソロ・間奏 | IM7 - ii7 |
+| ポップ・フォーム(16小節) (pop-form-16) | 16 | メジャー | J-POP, アニソン | pop, soft | 明るい, エモい, 前向き, 切ない | サビ, Aメロ | I - V - vi - IV - I - V - vi - IV - IV - V - iii - vi - ii7 - V7 - I - I |
+| ビルド・ディセンド (build-descend) | 4 | メジャー | J-POP, EDM, バラード | pop, soft | エモい, 切ない, 前向き | Bメロ, Aメロ | vi - IV - ii7 - V7 |
+| ハーフ・クローズ (half-close) | 4 | メジャー | バラード, J-POP, フォーク | soft, pop | 切ない, 落ち着いた, ロマンチック | Aメロ, Bメロ | I - V/vii - vi - V |
+| ブギー・ターン (boogie-turn) | 4 | メジャー | ブルース, ロック, カントリー | blues, rock | 怒り, 明るい, 懐かしい | ソロ・間奏, Aメロ, サビ | I7 - bVII7 - IV7 - I7 |
 | エオリアン・アンセム (aeolian-anthem) | 4 | マイナー | EDM, アニソン, K-POP, フューチャーベース | pop, rock, loop | エモい, ダーク, 切ない, 疾走感 | サビ, Aメロ | i - VI - III - VII |
 | エオリアン・ドライブ (aeolian-drive) | 4 | マイナー | メタル, メタルコア, パンク, ポストハードコア | rock, heavy, loop | 怒り, ダーク, 疾走感 | Aメロ, サビ, ソロ・間奏 | i - VII - VI - VII |
 | アンダルシア進行 (andalusian) | 4 | マイナー | −(汎用) | pop, rock, jazzy | ダーク, ミステリアス, 切ない | Bメロ, Cメロ・ブリッジ, Aメロ | i - VII - VI - V7 |
@@ -108,6 +148,70 @@
 | スロウ・バーン (slow-burn) | 4 | マイナー | ソウル, R&B, バラード | soul, jazzy, soft | ロマンチック, ダーク, 切ない | Aメロ, サビ | i7 - VIM7 - iv7 - V7 |
 | トラップ・スライド (trap-slide) | 2 | マイナー | ヒップホップ, ダブステップ | loop, heavy, soul | ダーク, ミステリアス, おしゃれ | Aメロ, イントロ, ブレイクダウン | i - VI |
 | マイナー・オデッセイ(8小節) (minor-odyssey-8) | 8 | マイナー | アニソン, バラード | pop, soft, rock | 悲しい, エモい, ダーク, 切ない | Aメロ, サビ | i - iv - VII - III - VI - iv - V7 - i |
+| マイナー・ライズ (minor-rise) | 4 | マイナー | EDM, K-POP, アニソン | pop, loop, rock | エモい, 前向き, 疾走感 | サビ, Bメロ | i - III - VI - VII |
+| エオリアン・プッシュ (aeolian-push) | 4 | マイナー | EDM, アニソン, ロック | pop, rock, loop | エモい, 疾走感, ダーク | Bメロ, サビ | i - VI - VII - VII |
+| マイナー・ドライブ (minor-drive-two) | 4 | マイナー | パンク, メタル, ロック | rock, heavy, loop | 疾走感, 怒り, ダーク | Aメロ, ソロ・間奏 | i - i - VII - VII |
+| モーダル・マイナーヴァンプ (modal-minor-vamp) | 2 | マイナー | フォーク, ロック | soft, rock, loop | ミステリアス, 落ち着いた, ダーク | イントロ, Aメロ | i - v |
+| ソフト・エオリアンラン (soft-aeolian-run) | 4 | マイナー | フォーク, ロック, EDM | soft, rock, pop | ミステリアス, 切ない, 前向き | Aメロ, Bメロ | i - v - VI - VII |
+| メランコリー・ループ (melancholy-loop) | 4 | マイナー | バラード, フォーク, エモ | soft, pop, rock | 悲しい, 切ない, 懐かしい | Aメロ, サビ | i - III - VII - iv |
+| サブトニック・ヴァンプ (subtonic-vamp) | 2 | マイナー | ロック, EDM, パンク | rock, loop | 疾走感, ダーク, エモい | イントロ, ソロ・間奏, Aメロ | i - VII |
+| シーソー・ループ (see-saw-loop) | 4 | マイナー | lo-fi hip hop, ヒップホップ, EDM | loop, soul, pop | 落ち着いた, ダーク, おしゃれ | Aメロ, イントロ | i - VI - i - VII |
+| オールドフォーク・ケーデンス (old-folk-cadence) | 4 | マイナー | フォーク, カントリー | soft, pop | 懐かしい, 落ち着いた, 悲しい | Aメロ, アウトロ | i - iv - v - i |
+| マイナー4-7ループ (minor-four-seven) | 4 | マイナー | ロック, フォーク, ブルース | rock, pop, blues | 懐かしい, ダーク, 落ち着いた | Aメロ, サビ | i - iv - VII - i |
+| フリジアン・ケーデンス (phrygian-cadence) | 4 | マイナー | メタル, ダブステップ | heavy | ダーク, ミステリアス, 怒り | Aメロ, ブレイクダウン | i - bII - iv - i |
+| ナポリ終止 (neapolitan-cadence) | 4 | マイナー | バラード, ジャズ | soft, jazzy | 悲しい, ミステリアス, ロマンチック | Bメロ, アウトロ, Aメロ | iv - bII - V7 - i |
+| フリジアン・ドミナントターン (phrygian-dominant-turn) | 4 | マイナー | メタル, ジャズ | heavy, jazzy | ミステリアス, 怒り, ダーク | Aメロ, ソロ・間奏 | i - bII - V7 - i |
+| マイナー・ドミナントヴァンプ (minor-dominant-vamp) | 2 | マイナー | バラード, フォーク, ジャズ | soft, pop, jazzy | 悲しい, 切ない, ダーク | イントロ, Aメロ, Bメロ | i - V7 |
+| マイナー偽終止 (minor-deception) | 4 | マイナー | バラード, アニソン | soft, pop | 悲しい, エモい, 切ない | Aメロ, Bメロ | i - V7 - VI - iv |
+| マイナー・フルケーデンス (minor-full-cadence) | 4 | マイナー | フォーク, バラード, ジャズ | soft, pop, jazzy | 悲しい, 落ち着いた, 懐かしい | Aメロ, アウトロ | i - iv - V7 - i |
+| マイナー6-5クローズ (minor-six-five) | 4 | マイナー | バラード, フォーク | soft, pop | 切ない, 悲しい, ロマンチック | Aメロ, アウトロ | i - VI - V7 - i |
+| ラメントバス(転回形) (lament-inversion) | 4 | マイナー | バラード, ジャズ | soft, jazzy | 悲しい, 切ない, ロマンチック | Aメロ, Bメロ | i - i/VII - iv/VI - V7 |
+| アンダルシア進行(8小節) (andalusian-8) | 8 | マイナー | フォーク, ロック | soft, rock | ダーク, ミステリアス, 懐かしい | Aメロ, ソロ・間奏 | i - i - VII - VII - VI - VI - V7 - V7 |
+| マイナー循環(1-4-7-3) (minor-circle-four) | 4 | マイナー | ジャズ, ボサノバ, lo-fi hip hop | jazzy | おしゃれ, 懐かしい, 落ち着いた | Aメロ, ソロ・間奏 | i7 - iv7 - VII7 - IIIM7 |
+| ジャズマイナー・ターン (jazz-minor-turn) | 4 | マイナー | ジャズ, ボサノバ | jazzy | おしゃれ, ダーク, ロマンチック | Aメロ, イントロ, ソロ・間奏 | iv7 - V7 - i7 - VIM7 |
+| アンダルシア(セブンス) (andalusian-seventh) | 4 | マイナー | ジャズ, シティポップ, ボサノバ | jazzy, soul | おしゃれ, ミステリアス, ダーク | Aメロ, ソロ・間奏 | i7 - VII7 - VIM7 - V7 |
+| フリジアン・ジャズヴァンプ (phrygian-jazz-vamp) | 2 | マイナー | ジャズ, ネオソウル, lo-fi hip hop | jazzy, soul | ミステリアス, おしゃれ, ダーク | イントロ, ソロ・間奏, Cメロ・ブリッジ | i7 - bIIM7 |
+| スモーキー・ヴァンプ (smoky-vamp) | 2 | マイナー | ジャズ, lo-fi hip hop, ヒップホップ | jazzy, soul, loop | ダーク, おしゃれ, 落ち着いた | イントロ, Aメロ, ソロ・間奏 | i7 - v7 |
+| ディープ・ヴァンプ (deep-vamp) | 2 | マイナー | R&B, ヒップホップ, ネオソウル | soul, loop, jazzy | ダーク, ロマンチック, 落ち着いた | イントロ, Aメロ | i7 - iv7 |
+| ペンデュラム・ソウル (pendulum-soul) | 4 | マイナー | ソウル, R&B, ブルース | soul, jazzy, blues | ダーク, ロマンチック, 懐かしい | Aメロ, サビ | iv7 - i7 - iv7 - V7 |
+| トラップ・ナイト (trap-night) | 4 | マイナー | ヒップホップ, ダブステップ, EDM | loop, heavy | ダーク, ミステリアス, 怒り | Aメロ, ブレイクダウン | i - bII - VI - VII |
+| lo-fiマイナーサークル (lofi-minor-circle) | 4 | マイナー | lo-fi hip hop, ジャズ, ネオソウル | jazzy, soul | 落ち着いた, 懐かしい, おしゃれ | Aメロ, イントロ | i7 - VIM7 - IIIM7 - VII7 |
+| レラティブ・フォール (relative-fall) | 4 | マイナー | シティポップ, lo-fi hip hop, R&B | jazzy, soul | 懐かしい, 切ない, おしゃれ | Aメロ, アウトロ | IIIM7 - VII7 - i7 - i7 |
+| サード・スタック (third-stack) | 4 | マイナー | ジャズ, ネオソウル | jazzy, soul | おしゃれ, ミステリアス, ロマンチック | Aメロ, Cメロ・ブリッジ | i7 - IIIM7 - VIM7 - V7 |
+| エピック・スウェル (epic-swell) | 4 | マイナー | EDM, アニソン, メタル | pop, rock, loop | エモい, ダーク, 前向き | Bメロ, サビ | VI - III - i - VII |
+| リフト・ヴァンプ (lift-vamp) | 2 | マイナー | EDM, フューチャーベース, アニソン | loop, pop | エモい, 前向き, 疾走感 | Bメロ, イントロ | VI - VII |
+| クール・ドリフト (cool-drift) | 4 | マイナー | K-POP, R&B, EDM | pop, soul, loop | おしゃれ, ダーク, 切ない | Aメロ, サビ | i - VI - iv - VII |
+| ハーフタイム・スウェイ (half-time-sway) | 4 | マイナー | ヒップホップ, lo-fi hip hop, ダブステップ | loop, soul, heavy | ダーク, 落ち着いた, ミステリアス | Aメロ, ブレイクダウン, イントロ | i - i - iv - iv |
+| フォルス・ブライト (false-bright) | 4 | マイナー | K-POP, EDM, アニソン | pop, loop | 明るい, エモい, 前向き | サビ, Bメロ | VI - VII - III - III |
+| フェード・ダウン (fade-down) | 4 | マイナー | バラード, エモ, ロック | soft, rock, pop | 切ない, 悲しい, ダーク | Aメロ, アウトロ | i - VII - VI - iv |
+| フリジアン・プラガル (phrygian-plagal) | 4 | マイナー | メタル, メタルコア, ポストハードコア | heavy | ダーク, 怒り, ミステリアス | Aメロ, ブレイクダウン, ソロ・間奏 | i - iv - bII - i |
+| クロマチック・サラウンド (chromatic-surround) | 4 | マイナー | メタル, メタルコア | heavy | 怒り, ミステリアス, ダーク | ソロ・間奏, ブレイクダウン | i - VII - bII - i |
+| ソンバー・ターン (somber-turn) | 4 | マイナー | バラード, フォーク, アニソン | soft, pop | 悲しい, 切ない, 懐かしい | Aメロ, サビ | i - VI - III - iv |
+| マイナーポップ・ケーデンス (minor-pop-cadence) | 4 | マイナー | アニソン, K-POP, J-POP | pop, soft | エモい, 悲しい, 前向き | Bメロ, サビ | VI - iv - i - V7 |
+| ダブル・ケーデンス (double-cadence-minor) | 4 | マイナー | フォーク, ジャズ | soft, jazzy, pop | 落ち着いた, 悲しい, 懐かしい | アウトロ, Aメロ | iv - i - V7 - i |
+| フリジアン・ディセント (phrygian-descent) | 4 | マイナー | メタル, フォーク | heavy, jazzy | ミステリアス, ダーク, 怒り | Bメロ, ソロ・間奏, Cメロ・ブリッジ | iv - III - bII - i |
+| エオリアン・ストーリー(8小節) (aeolian-story-8) | 8 | マイナー | ロック, アニソン, エモ | rock, pop | エモい, 切ない, ダーク | Aメロ, サビ | i - VII - VI - VII - i - VII - VI - V7 |
+| ベルベット・スイープ (velvet-sweep) | 4 | マイナー | R&B, ソウル, ジャズ | soul, jazzy | ロマンチック, ダーク, おしゃれ | サビ, Aメロ | i7 - iv7 - VIM7 - V7 |
+| 12小節マイナーブルース(ソウル) (minor-blues-12-soul) | 12 | マイナー | ブルース, ソウル | blues, soul | ダーク, 懐かしい, 落ち着いた, 悲しい | Aメロ, ソロ・間奏 | i7 - iv7 - i7 - i7 - iv7 - iv7 - i7 - i7 - VI7 - V7 - i7 - V7 |
+| マイナー・ドッペルドミナント (minor-dominant-approach) | 4 | マイナー | ジャズ, ボサノバ | jazzy | おしゃれ, ミステリアス, ダーク | Bメロ, アウトロ, ソロ・間奏 | II7 - V7 - i - i |
+| レラティブ・リフト (relative-lift) | 4 | マイナー | EDM, K-POP, フューチャーベース | pop, loop | 明るい, エモい, 前向き | サビ, Aメロ | i - VI - VII - III |
+| ドリアン・カラー (dorian-color) | 4 | マイナー | ファンク, ロック | soul, rock, jazzy | おしゃれ, ミステリアス, 落ち着いた | Aメロ, ソロ・間奏 | i - III - IV - VI |
+| ラテンロック・ループ (latin-rock-loop) | 4 | マイナー | ロック, ファンク | rock, soul, loop | 疾走感, おしゃれ, 明るい | Aメロ, ソロ・間奏, サビ | i - IV - i - VII |
+| マイナー・バックドアクローズ (minor-backdoor-close) | 4 | マイナー | ジャズ, lo-fi hip hop, R&B | jazzy, soul | 落ち着いた, おしゃれ, ダーク | アウトロ, Aメロ | iv - VII - i - i |
+| ラメント・リフト (lament-lift) | 4 | マイナー | ロック, バラード, エモ | rock, soft, pop | エモい, 切ない, 前向き | Aメロ, Bメロ | i - i/VII - VI - VII |
+| トレーラー・ビルド(8小節) (trailer-build-8) | 8 | マイナー | メタル, EDM, アニソン | heavy, rock, pop | ダーク, 怒り, エモい, 疾走感 | Bメロ, サビ | i - VI - III - VII - iv - VI - V7 - V7 |
+| プッシュ・ヴァンプ (push-vamp) | 2 | マイナー | −(汎用) | 全タグ | −(汎用) | Bメロ | iv - V7 |
+| フォークダンス(8小節) (folk-dance-8) | 8 | マイナー | フォーク | soft, pop | 懐かしい, 悲しい, 疾走感 | Aメロ, サビ, ソロ・間奏 | i - V7 - i - V7 - VI - iv - V7 - i |
+| レラティブ・スパイラル (relative-spiral) | 4 | マイナー | エモ, ロック, アニソン | rock, pop | エモい, 切ない, ダーク | サビ, Bメロ | III - VI - VII - i |
+| マイナー・アーチ (minor-arch) | 4 | マイナー | バラード, シティポップ | soft, pop, jazzy | 切ない, ロマンチック, ミステリアス | Aメロ, Cメロ・ブリッジ | i - III - VI - iv |
+| ドリアン・ケーデンス (dorian-cadence) | 4 | マイナー | ファンク, ネオソウル, ジャズ | soul, jazzy | おしゃれ, 明るい, ミステリアス | Aメロ, Bメロ | i7 - IV7 - VIM7 - V7 |
+| ダーク・ロマンス (dark-romance) | 4 | マイナー | ジャズ, バラード | jazzy, soft | ロマンチック, ミステリアス, ダーク | Aメロ, Cメロ・ブリッジ | i - bII - VI - V7 |
+| クラウド・ヴァンプ (cloud-vamp) | 2 | マイナー | lo-fi hip hop, ネオソウル, フューチャーベース | jazzy, soul, loop | 落ち着いた, ロマンチック, 切ない | イントロ, Aメロ | VIM7 - i7 |
+| マイナー・フォーム(16小節) (minor-form-16) | 16 | マイナー | アニソン, EDM | pop, rock, loop | エモい, ダーク, 疾走感, 前向き | サビ, Aメロ | i - VI - III - VII - i - VI - III - VII - iv - VI - i - VII - iv - iv - V7 - V7 |
+| シャドウ・ドリフト (shadow-drift) | 4 | マイナー | ダブステップ, メタルコア, ヒップホップ | heavy, loop | ダーク, ミステリアス, 怒り | Aメロ, ブレイクダウン | i - iv - VI - bII |
+| マイナーサークル・ドリフト (minor-circle-drift) | 4 | マイナー | ジャズ, ボサノバ, シティポップ | jazzy | 懐かしい, おしゃれ, 落ち着いた | Aメロ, ソロ・間奏, イントロ | i7 - VII7 - IIIM7 - VIM7 |
+| レラティブ・ヴァンプ (relative-vamp) | 2 | マイナー | lo-fi hip hop, フォーク, エモ | soft, loop, pop | 切ない, 落ち着いた, 懐かしい | イントロ, Aメロ | i - III |
+| ドーン・リフト (dawn-lift) | 4 | マイナー | フューチャーベース, EDM, アニソン | pop, loop | 前向き, エモい, 明るい | サビ, Bメロ | VI - VII - i - III |
 
 ## 2. 表記の凡例
 

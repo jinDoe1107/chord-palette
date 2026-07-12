@@ -51,9 +51,12 @@ header {
   letter-spacing: .08em; text-transform: uppercase;
 }
 
-.grid { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 20px; }
-@media (max-width: 760px) { .grid { grid-template-columns: minmax(0, 1fr); } }
 .panel, .sheet { min-width: 0; }
+
+/* ---- Settings bar (opens the modal) ---- */
+.settings-bar { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; flex-wrap: wrap; }
+.settings-bar .combo { margin-top: 0; text-align: left; color: #a9a08a; }
+.settings-bar .combo b { color: #EDE6D6; }
 
 /* ---- Control panel: brushed aluminum ---- */
 .panel {
@@ -76,6 +79,23 @@ header {
   color: #4b4e53; margin: 18px 0 8px; text-transform: uppercase;
 }
 .panel h2:first-child { margin-top: 0; }
+
+/* ---- Settings modal (the old left panel, now floating) ---- */
+.modal-backdrop { position: fixed; inset: 0; z-index: 30; background: rgba(0, 0, 0, .55); }
+.panel.settings-modal {
+  position: fixed; z-index: 31; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: min(560px, calc(100vw - 32px));
+  max-height: calc(100vh - 48px); overflow-y: auto;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.6), inset 0 -2px 6px rgba(0,0,0,.15), 0 24px 60px rgba(0,0,0,.6);
+}
+.settings-modal-head {
+  display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;
+}
+.settings-modal-title {
+  font-size: 12px; font-weight: 700; letter-spacing: .12em;
+  color: #4b4e53; text-transform: uppercase;
+}
+.settings-modal-head .x { font-size: 20px; line-height: 1; }
 
 .section-toggle {
   all: unset; display: flex; align-items: center; justify-content: space-between;
