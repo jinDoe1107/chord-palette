@@ -14,12 +14,33 @@ export default function LeadSheet({ song, aiStatus, aiProgress, hasWebGPU, onTog
   const [newType, setNewType] = useState(SECTION_TYPES[0].id);
   const [newBars, setNewBars] = useState(8);
 
+  const addSectionCard = (
+    <div className="section-card add-section-card">
+      <div className="row">
+        <select value={newType} onChange={(e) => setNewType(e.target.value)} aria-label="追加するセクションの種類">
+          {SECTION_TYPES.map((t) => (
+            <option key={t.id} value={t.id}>{t.label}</option>
+          ))}
+        </select>
+        <div className="stepper">
+          <button onClick={() => setNewBars((v) => Math.max(1, v - 1))} aria-label="小節を減らす">−</button>
+          <span>{newBars}小節</span>
+          <button onClick={() => setNewBars((v) => Math.min(16, v + 1))} aria-label="小節を増やす">＋</button>
+        </div>
+      </div>
+      <button className="add" onClick={() => onAddSection(newType, newBars)}>＋ セクションを追加</button>
+    </div>
+  );
+
   if (!song) {
     return (
-      <div className="empty">
-        「⚙ 設定」でジャンル・ムード・曲構成を選び<br />
-        「コード進行を生成」を押すと、ここにリードシートが表示されます
-      </div>
+      <>
+        <div className="empty">
+          「＋ セクションを追加」で一からコード進行を作成できます。<br />
+          「⚙ 設定」の「コード進行を生成」でおまかせ生成もできます
+        </div>
+        {addSectionCard}
+      </>
     );
   }
 
@@ -86,11 +107,10 @@ export default function LeadSheet({ song, aiStatus, aiProgress, hasWebGPU, onTog
             >✨ AI</button>
             <select
               className="mood-override"
-              value={section.moodId || ""}
-              onChange={(e) => onUpdateSection(si, { moodId: e.target.value || null })}
+              value={section.moodId}
+              onChange={(e) => onUpdateSection(si, { moodId: e.target.value })}
               aria-label={`${section.label}のムード`}
             >
-              <option value="">ムード：共通設定を使用</option>
               {MOODS.map((m) => (
                 <option key={m.id} value={m.id}>{m.label}</option>
               ))}
@@ -196,21 +216,7 @@ export default function LeadSheet({ song, aiStatus, aiProgress, hasWebGPU, onTog
         </div>
       ))}
 
-      <div className="section-card add-section-card">
-        <div className="row">
-          <select value={newType} onChange={(e) => setNewType(e.target.value)} aria-label="追加するセクションの種類">
-            {SECTION_TYPES.map((t) => (
-              <option key={t.id} value={t.id}>{t.label}</option>
-            ))}
-          </select>
-          <div className="stepper">
-            <button onClick={() => setNewBars((v) => Math.max(1, v - 1))} aria-label="小節を減らす">−</button>
-            <span>{newBars}小節</span>
-            <button onClick={() => setNewBars((v) => Math.min(16, v + 1))} aria-label="小節を増やす">＋</button>
-          </div>
-        </div>
-        <button className="add" onClick={() => onAddSection(newType, newBars)}>＋ セクションを追加</button>
-      </div>
+      {addSectionCard}
     </>
   );
 }

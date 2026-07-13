@@ -86,10 +86,14 @@ header {
   position: fixed; z-index: 31; top: 50%; left: 50%; transform: translate(-50%, -50%);
   width: min(560px, calc(100vw - 32px));
   max-height: calc(100vh - 48px); overflow-y: auto;
+  padding-top: 0; /* ヘッダー自身が上パディングを持ち、スクロール時も同じ位置に貼り付く */
   box-shadow: inset 0 1px 0 rgba(255,255,255,.6), inset 0 -2px 6px rgba(0,0,0,.15), 0 24px 60px rgba(0,0,0,.6);
 }
 .settings-modal-head {
-  display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;
+  position: sticky; top: 0; z-index: 2;
+  display: flex; align-items: center; justify-content: space-between;
+  margin: 0 -18px 4px; padding: 20px 18px 10px;
+  background: #d9dadb; border-radius: 10px 10px 0 0;
 }
 .settings-modal-title {
   font-size: 12px; font-weight: 700; letter-spacing: .12em;
@@ -124,7 +128,25 @@ header {
 }
 .sec-ai-toggle:hover { border-color: var(--acc); color: #EDE6D6; }
 .sec-ai-toggle.on { background: var(--acc); border-color: var(--acc); color: #fff; box-shadow: 0 0 8px 1px var(--acc); }
-.ai-note { font-size: 11px; color: #9a9c9e; line-height: 1.6; margin-top: 6px; }
+.ai-note { font-size: 11px; line-height: 1.6; }
+.section-ai .ai-note { color: #9a9c9e; margin-top: 6px; }
+
+/* ---- Settings modal: AI assist default toggle ---- */
+.ai-toggle {
+  all: unset; display: flex; align-items: center; gap: 8px;
+  width: 100%; box-sizing: border-box; cursor: pointer;
+  font-size: 13px; font-weight: 500; color: #23262b; font-family: inherit;
+  padding: 8px 10px; margin-bottom: 8px;
+  border: 1px solid #8b8d8f; border-radius: 8px;
+  background: #c7c9cb; box-shadow: inset 0 1px 3px rgba(0,0,0,.15);
+}
+.ai-toggle:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
+.beta-badge {
+  font-size: 10px; font-weight: 700; letter-spacing: .05em;
+  padding: 1px 7px; border-radius: 999px;
+  background: #55575a; color: #fff;
+}
+.settings-modal .ai-note { color: #4b4e53; margin-bottom: 8px; }
 
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .chip {

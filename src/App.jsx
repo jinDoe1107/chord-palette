@@ -31,12 +31,14 @@ export default function App() {
   const [keyMode, setKeyMode] = useState("major");
   const [structure, setStructure] = useState([]);
   const [targetSeconds, setTargetSeconds] = useState(LENGTH_RANGE.default);
-  const [open, setOpen] = useState({ genre: true, mood: true, key: true, bpm: true, structure: true });
+  const [open, setOpen] = useState({ genre: true, mood: true, engine: true, key: true, bpm: true, structure: true });
   const toggleSection = (k) => setOpen((prev) => ({ ...prev, [k]: !prev[k] }));
   const [settingsOpen, setSettingsOpen] = useState(true); // 初回は設定モーダルを開いた状態で開始
   const [bpm, setBpm] = useState(() => suggestTempo(GENRES.find((g) => g.id === "jpop"), MOODS.find((m) => m.id === "wistful")));
   const [song, setSong] = useState(null);
   const [copied, setCopied] = useState(false);
+  const [aiDefault, setAiDefault] = useState(false); // 新規セクションのAIアシスト既定値(セクション個別トグルで上書き可)
+  const [hint, setHint] = useState("");
   const [aiStatus, setAiStatus] = useState("idle"); // idle | loading | ready | error
   const [aiProgress, setAiProgress] = useState(0);
   const aiReadyRef = useRef(false);
@@ -97,7 +99,7 @@ export default function App() {
     const engine = useAi && (await ensureAiReady()) ? lmSelectorEngine : templateEngine;
     return engine.generate({
       genreId, moodId, keyIndex: key.keyIndex, keyMode: key.keyMode,
-      bpm: tempo, sections, hint: null,
+      bpm: tempo, sections, hint: hint.trim() || null,
       rng: mulberry32(randomSeed()), // 実行毎に新シード
     });
   };
@@ -105,11 +107,12 @@ export default function App() {
   const generate = async () => {
     if (structure.length === 0) return;
     stop();
-    const sections = structure.map((s) => ({ type: s.type, bars: s.bars, moodId: s.moodId ?? null, ai: s.ai ?? false, hint: s.hint ?? null, fixedTokens: null }));
+    // moodId/ai が未指定(null/undefined)のセクションは設定の既定値に従う。個別設定済みのセクションはそちらを優先
+    const sections = structure.map((s) => ({ type: s.type, bars: s.bars, moodId: s.moodId ?? moodId, ai: s.ai ?? aiDefault, hint: s.hint ?? null, fixedTokens: null }));
     const tokenSections = await runEngine(sections, { keyIndex, keyMode }, bpm);
     setSong({
       genreLabel: genre.label, moodLabel: mood.label, tempo: bpm, keyIndex, keyMode,
-      sections: structure.map((s, i) => buildSongSection(s, tokenSections[i], keyIndex, keyMode)),
+      sections: sections.map((s, i) => buildSongSection(s, tokenSections[i], keyIndex, keyMode)),
     });
     setSettingsOpen(false); // 生成できたらモーダルを閉じてシートを見せる
   };
@@ -138,18 +141,27 @@ export default function App() {
   };
 
   const addSection = async (type, bars) => {
-    const newSec = { type, bars, moodId: null, ai: false, hint: null };
+    const newSec = { type, bars, moodId: null, ai: null, hint: null }; // ai未指定=設定の既定値に従う
     setStructure((prev) => [...prev, newSec]);
-    if (!song) return; // シート未生成なら構成のみ追加
+    const resolvedNewSec = { ...newSec, moodId: newSec.moodId ?? moodId, ai: newSec.ai ?? aiDefault };
+    if (!song) {
+      // 未生成の状態からでも、まずはトニック仮置きのセクションを作って手動編集を始められるようにする
+      const blankTokens = Array(bars).fill(keyMode === "minor" ? "i" : "I");
+      setSong({
+        genreLabel: genre.label, moodLabel: mood.label, tempo: bpm, keyIndex, keyMode,
+        sections: [buildSongSection(resolvedNewSec, blankTokens, keyIndex, keyMode)],
+      });
+      return;
+    }
     stop();
     const sections = [
       ...song.sections.map((s) => ({ type: s.type, bars: s.bars, moodId: s.moodId ?? null, ai: s.ai ?? false, hint: s.hint ?? null, fixedTokens: s.tokens ?? null })),
-      { ...newSec, fixedTokens: null },
+      { ...resolvedNewSec, fixedTokens: null },
     ];
     const tokenSections = await runEngine(sections, song, song.tempo);
     setSong((prev) => prev && {
       ...prev,
-      sections: [...prev.sections, buildSongSection(newSec, tokenSections[tokenSections.length - 1], prev.keyIndex, prev.keyMode)],
+      sections: [...prev.sections, buildSongSection(resolvedNewSec, tokenSections[tokenSections.length - 1], prev.keyIndex, prev.keyMode)],
     });
   };
 
@@ -206,11 +218,19 @@ export default function App() {
 
   const copyText = () => {
     if (!song) return;
-    const head = `[${song.genreLabel} × ${song.moodLabel} / ${NOTE_NAMES[keyIndex]}${keyModeLabel} / ♩=${song.tempo}]`;
-    const text =
-      head +
-      "\n" +
-      song.sections.map((s) => `${s.label}: ${s.chords.map((c) => c.name).join(" | ")}`).join("\n");
+    const keyLabel = `${NOTE_NAMES[keyIndex]} ${keyMode === "minor" ? "Minor" : "Major"}`;
+    const chordLines = (chords) => {
+      const lines = [];
+      for (let i = 0; i < chords.length; i += 4) {
+        lines.push(chords.slice(i, i + 4).map((c) => `[${c.name}]`).join(""));
+      }
+      return lines;
+    };
+    const text = [
+      `[KEY: ${keyLabel}]`,
+      `[BPM: ${song.tempo}]`,
+      ...song.sections.flatMap((s) => ["", `[${s.label}]`, ...chordLines(s.chords)]),
+    ].join("\n");
     navigator.clipboard.writeText(text).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 1600);
@@ -301,6 +321,49 @@ export default function App() {
                   </button>
                 ))}
               </div>
+            )}
+
+            <SectionHeader label="生成エンジン" open={open.engine} onToggle={() => toggleSection("engine")} />
+            {open.engine && (
+              <>
+                <button
+                  type="button"
+                  className="ai-toggle"
+                  onClick={() => {
+                    const next = !aiDefault;
+                    setAiDefault(next);
+                    if (next) ensureAiReady(); // オンにしたら先回りでモデルを準備(冪等)
+                  }}
+                  aria-pressed={aiDefault}
+                >
+                  <span className={`toggle-switch ${aiDefault ? "on" : ""}`} aria-hidden="true" />
+                  <span>AIアシスト</span>
+                  <span className="beta-badge">βテスト</span>
+                </button>
+                <div className="ai-note">
+                  βテスト中の機能です。初回利用時にAIモデル（約0.4GB）のダウンロードが必要です。新規セクションの既定値で、セクションごとに個別オン/オフもできます。
+                </div>
+                {aiDefault && (
+                  <input
+                    className="hint-input"
+                    type="text"
+                    value={hint}
+                    onChange={(e) => setHint(e.target.value)}
+                    maxLength={120}
+                    placeholder="AIへのヒント（例: サビは壮大に）"
+                    aria-label="AIへのヒント"
+                  />
+                )}
+                {aiDefault && aiStatus === "loading" && (
+                  <div className="ai-status">モデルを準備中… {Math.round(aiProgress * 100)}%</div>
+                )}
+                {aiStatus === "error" && (
+                  <div className="ai-status error">モデルの読み込みに失敗しました。時間を置いて再度お試しください</div>
+                )}
+                {aiDefault && aiStatus === "ready" && !hasWebGPU && (
+                  <div className="ai-status">この環境はWebGPU非対応のため生成に時間がかかることがあります</div>
+                )}
+              </>
             )}
 
             <SectionHeader label="キー" open={open.key} onToggle={() => toggleSection("key")} />
