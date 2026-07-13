@@ -140,9 +140,14 @@ export default function App() {
     });
   };
 
-  const addSection = async (type, bars) => {
+  // index位置にセクションを挿入(前後のセクションを文脈にして生成)。index === 現在の件数 で末尾追加になる
+  const insertSection = async (index, type, bars) => {
     const newSec = { type, bars, moodId: null, ai: null, hint: null }; // ai未指定=設定の既定値に従う
-    setStructure((prev) => [...prev, newSec]);
+    setStructure((prev) => {
+      const copy = [...prev];
+      copy.splice(index, 0, newSec);
+      return copy;
+    });
     const resolvedNewSec = { ...newSec, moodId: newSec.moodId ?? moodId, ai: newSec.ai ?? aiDefault };
     if (!song) {
       // 未生成の状態からでも、まずはトニック仮置きのセクションを作って手動編集を始められるようにする
@@ -154,16 +159,17 @@ export default function App() {
       return;
     }
     stop();
-    const sections = [
-      ...song.sections.map((s) => ({ type: s.type, bars: s.bars, moodId: s.moodId ?? null, ai: s.ai ?? false, hint: s.hint ?? null, fixedTokens: s.tokens ?? null })),
-      { ...resolvedNewSec, fixedTokens: null },
-    ];
+    const sections = song.sections.map((s) => ({ type: s.type, bars: s.bars, moodId: s.moodId ?? null, ai: s.ai ?? false, hint: s.hint ?? null, fixedTokens: s.tokens ?? null }));
+    sections.splice(index, 0, { ...resolvedNewSec, fixedTokens: null });
     const tokenSections = await runEngine(sections, song, song.tempo);
-    setSong((prev) => prev && {
-      ...prev,
-      sections: [...prev.sections, buildSongSection(resolvedNewSec, tokenSections[tokenSections.length - 1], prev.keyIndex, prev.keyMode)],
+    setSong((prev) => {
+      if (!prev) return prev;
+      const newSections = [...prev.sections];
+      newSections.splice(index, 0, buildSongSection(resolvedNewSec, tokenSections[index], prev.keyIndex, prev.keyMode));
+      return { ...prev, sections: newSections };
     });
   };
+  const addSection = (type, bars) => insertSection(structure.length, type, bars);
 
   const updateSectionSettings = (si, patch) => {
     setStructure((prev) => prev.map((sec, i) => (i === si ? { ...sec, ...patch } : sec)));
@@ -277,6 +283,7 @@ export default function App() {
             copied={copied}
             onChangeChord={updateChord}
             onAddSection={addSection}
+            onInsertSection={insertSection}
             onRemoveSection={removeGeneratedSection}
             onReorderSections={reorderGeneratedSection}
             onRegenerateSection={regenerateSection}

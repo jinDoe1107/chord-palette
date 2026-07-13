@@ -8,11 +8,12 @@ import ChordPicker from "./ChordPicker.jsx";
 
 const PICKER_WIDTH = 280;
 
-export default function LeadSheet({ song, aiStatus, aiProgress, hasWebGPU, onToggleSectionAi, cursor, playing, playingSection, speed, onChangeSpeed, tone, onChangeTone, onPlay, onPlaySection, onStop, onRegenerate, onCopy, copied, onChangeChord, onAddSection, onRemoveSection, onReorderSections, onRegenerateSection, onUpdateSection }) {
+export default function LeadSheet({ song, aiStatus, aiProgress, hasWebGPU, onToggleSectionAi, cursor, playing, playingSection, speed, onChangeSpeed, tone, onChangeTone, onPlay, onPlaySection, onStop, onRegenerate, onCopy, copied, onChangeChord, onAddSection, onInsertSection, onRemoveSection, onReorderSections, onRegenerateSection, onUpdateSection }) {
   const [editing, setEditing] = useState(null); // { section, bar, top, left }
   const [dragIndex, setDragIndex] = useState(null);
   const [newType, setNewType] = useState(SECTION_TYPES[0].id);
   const [newBars, setNewBars] = useState(8);
+  const [insertAt, setInsertAt] = useState(null); // 挿入フォームを開いているギャップのindex(null=非表示)
 
   const addSectionCard = (
     <div className="section-card add-section-card">
@@ -68,10 +69,11 @@ export default function LeadSheet({ song, aiStatus, aiProgress, hasWebGPU, onTog
         <span className="duration">全{totalBars}小節 ・ 約{duration}</span>
       </div>
 
-      {song.sections.map((section, si) => (
+      {song.sections.flatMap((section, si) => {
+        const card = (
         <div
           className={`section-card ${dragIndex === si ? "dragging" : ""}`}
-          key={si}
+          key={`sec-${si}`}
           onDragOver={(e) => e.preventDefault()}
           onDrop={() => {
             if (dragIndex !== null && dragIndex !== si) onReorderSections(dragIndex, si);
@@ -214,7 +216,46 @@ export default function LeadSheet({ song, aiStatus, aiProgress, hasWebGPU, onTog
             })}
           </div>
         </div>
-      ))}
+        );
+
+        if (si === song.sections.length - 1) return [card];
+        const gapIndex = si + 1;
+        const isOpen = insertAt === gapIndex;
+        const gap = (
+          <div className={`section-gap ${isOpen ? "open" : ""}`} key={`gap-${si}`}>
+            {!isOpen ? (
+              <button
+                type="button"
+                className="gap-add"
+                onClick={() => setInsertAt(gapIndex)}
+                aria-label={`${section.label}の後にセクションを挿入`}
+              >＋</button>
+            ) : (
+              <div className="gap-form">
+                <select value={newType} onChange={(e) => setNewType(e.target.value)} aria-label="挿入するセクションの種類">
+                  {SECTION_TYPES.map((t) => (
+                    <option key={t.id} value={t.id}>{t.label}</option>
+                  ))}
+                </select>
+                <div className="stepper">
+                  <button onClick={() => setNewBars((v) => Math.max(1, v - 1))} aria-label="小節を減らす">−</button>
+                  <span>{newBars}小節</span>
+                  <button onClick={() => setNewBars((v) => Math.min(16, v + 1))} aria-label="小節を増やす">＋</button>
+                </div>
+                <button
+                  className="tool"
+                  onClick={() => {
+                    onInsertSection(gapIndex, newType, newBars);
+                    setInsertAt(null);
+                  }}
+                >＋ 挿入</button>
+                <button className="x" onClick={() => setInsertAt(null)} aria-label="挿入をキャンセル">×</button>
+              </div>
+            )}
+          </div>
+        );
+        return [card, gap];
+      })}
 
       {addSectionCard}
     </>

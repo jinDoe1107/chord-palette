@@ -292,6 +292,23 @@ footer.credits a:hover { color: var(--acc); }
 .add-section-card { border-style: dashed; border-color: #55575a; padding: 14px 16px; }
 .add-section-card .row { margin-bottom: 10px; }
 
+/* ---- Insert-between-sections gap ---- */
+.section-gap { display: flex; align-items: center; justify-content: center; margin: -8px 0; }
+.section-gap.open { margin: 0; }
+.gap-add {
+  width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0;
+  border: 1px solid #55575a; background: linear-gradient(180deg, #3a3c40, #232427);
+  color: #9a9c9e; font-size: 14px; line-height: 1; cursor: pointer;
+  opacity: .4; transition: all .15s;
+}
+.section-gap:hover .gap-add, .gap-add:focus-visible { opacity: 1; }
+.gap-add:hover { border-color: var(--acc); color: #EDE6D6; }
+.gap-form {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap; width: 100%;
+  background: linear-gradient(180deg, #2b2d31, #1c1d20); border: 1px dashed #55575a; border-radius: 8px;
+  padding: 8px 10px;
+}
+
 .section-head {
   display: flex; align-items: center; gap: 10px;
   padding: 10px 14px; border-bottom: 1px solid #45484f;
