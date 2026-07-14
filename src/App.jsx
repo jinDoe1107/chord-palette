@@ -2,6 +2,8 @@ import { useState, useMemo, useEffect, useRef } from "react";
 import "./App.css";
 import { NOTE_NAMES, MOODS, GENRES, LENGTH_RANGE } from "./data/musicData.js";
 import { songDurationSeconds, formatDuration } from "./lib/duration.js";
+import { PLAYBACK_SPEEDS } from "./lib/playbackSpeed.js";
+import { GUITAR_TONES } from "./lib/guitarTones.js";
 import { usePlayback } from "./hooks/usePlayback.js";
 import StructureEditor from "./components/StructureEditor.jsx";
 import LeadSheet from "./components/LeadSheet.jsx";
@@ -34,6 +36,7 @@ export default function App() {
   const [open, setOpen] = useState({ genre: true, mood: true, engine: true, key: true, bpm: true, structure: true });
   const toggleSection = (k) => setOpen((prev) => ({ ...prev, [k]: !prev[k] }));
   const [settingsOpen, setSettingsOpen] = useState(true); // 初回は設定モーダルを開いた状態で開始
+  const [playbackOpen, setPlaybackOpen] = useState(false); // 再生設定モーダル(速度・音色)
   const [bpm, setBpm] = useState(() => suggestTempo(GENRES.find((g) => g.id === "jpop"), MOODS.find((m) => m.id === "wistful")));
   const [song, setSong] = useState(null);
   const [copied, setCopied] = useState(false);
@@ -46,11 +49,12 @@ export default function App() {
 
   const { playing, playingSection, cursor, speed, setSpeed, tone, setTone, play, stop } = usePlayback();
 
-  // モーダル表示中: Escapeで閉じる + 背景スクロールをロック
+  // いずれかのモーダル表示中: Escapeで閉じる + 背景スクロールをロック
+  const anyModalOpen = settingsOpen || playbackOpen;
   useEffect(() => {
-    if (!settingsOpen) return;
+    if (!anyModalOpen) return;
     const onKey = (e) => {
-      if (e.key === "Escape") setSettingsOpen(false);
+      if (e.key === "Escape") { setSettingsOpen(false); setPlaybackOpen(false); }
     };
     window.addEventListener("keydown", onKey);
     const prevOverflow = document.body.style.overflow;
@@ -59,7 +63,7 @@ export default function App() {
       window.removeEventListener("keydown", onKey);
       document.body.style.overflow = prevOverflow;
     };
-  }, [settingsOpen]);
+  }, [anyModalOpen]);
 
   const genre = useMemo(() => GENRES.find((g) => g.id === genreId), [genreId]);
   const mood = useMemo(() => MOODS.find((m) => m.id === moodId), [moodId]);
@@ -249,6 +253,9 @@ export default function App() {
         <header>
           <div className="logo">Chord Palette</div>
           <div className="tag">ジャンル × ムードで作るコード進行</div>
+          <button className="header-tool" onClick={() => setPlaybackOpen(true)} aria-haspopup="dialog">
+            ♪ 再生設定
+          </button>
         </header>
 
         <div className="settings-bar">
@@ -280,10 +287,6 @@ export default function App() {
             cursor={cursor}
             playing={playing}
             playingSection={playingSection}
-            speed={speed}
-            onChangeSpeed={setSpeed}
-            tone={tone}
-            onChangeTone={setTone}
             onPlay={() => play(song)}
             onPlaySection={(si) => (playingSection === si ? stop() : play(song, si))}
             onStop={stop}
@@ -468,6 +471,33 @@ export default function App() {
             </button>
             <div className="combo">
               <b>{genre.label}</b> × <b>{mood.label}</b> ・ {NOTE_NAMES[keyIndex]}{keyModeLabel} ・ ♩={bpm}
+            </div>
+          </div>
+        )}
+
+        {/* Playback settings modal */}
+        {playbackOpen && <div className="modal-backdrop" onClick={() => setPlaybackOpen(false)} />}
+        {playbackOpen && (
+          <div className="panel settings-modal playback-modal" role="dialog" aria-modal="true" aria-label="再生設定">
+            <div className="settings-modal-head">
+              <span className="settings-modal-title">再生設定</span>
+              <button className="x" onClick={() => setPlaybackOpen(false)} aria-label="閉じる">×</button>
+            </div>
+            <div className="playback-field">
+              <label htmlFor="pb-speed">再生速度</label>
+              <select id="pb-speed" value={speed} onChange={(e) => setSpeed(Number(e.target.value))}>
+                {PLAYBACK_SPEEDS.map((s) => (
+                  <option key={s} value={s}>×{s}</option>
+                ))}
+              </select>
+            </div>
+            <div className="playback-field">
+              <label htmlFor="pb-tone">ギター音色</label>
+              <select id="pb-tone" value={tone} onChange={(e) => setTone(e.target.value)}>
+                {GUITAR_TONES.map((t) => (
+                  <option key={t.id} value={t.id}>{t.label}</option>
+                ))}
+              </select>
             </div>
           </div>
         )}

@@ -2,13 +2,11 @@ import { useState } from "react";
 import { createPortal } from "react-dom";
 import { SECTION_TYPES, MOODS } from "../data/musicData.js";
 import { songDurationSeconds, formatDuration } from "../lib/duration.js";
-import { PLAYBACK_SPEEDS } from "../lib/playbackSpeed.js";
-import { GUITAR_TONES } from "../lib/guitarTones.js";
 import ChordPicker from "./ChordPicker.jsx";
 
 const PICKER_WIDTH = 280;
 
-export default function LeadSheet({ song, aiStatus, aiProgress, hasWebGPU, onToggleSectionAi, cursor, playing, playingSection, speed, onChangeSpeed, tone, onChangeTone, onPlay, onPlaySection, onStop, onRegenerate, onCopy, copied, onChangeChord, onAddSection, onInsertSection, onRemoveSection, onReorderSections, onRegenerateSection, onUpdateSection }) {
+export default function LeadSheet({ song, aiStatus, aiProgress, hasWebGPU, onToggleSectionAi, cursor, playing, playingSection, onPlay, onPlaySection, onStop, onRegenerate, onCopy, copied, onChangeChord, onAddSection, onInsertSection, onRemoveSection, onReorderSections, onRegenerateSection, onUpdateSection }) {
   const [editing, setEditing] = useState(null); // { section, bar, top, left }
   const [dragIndex, setDragIndex] = useState(null);
   const [newType, setNewType] = useState(SECTION_TYPES[0].id);
@@ -54,16 +52,6 @@ export default function LeadSheet({ song, aiStatus, aiProgress, hasWebGPU, onTog
         <button className="tool primary" onClick={playing ? onStop : onPlay}>
           {playing ? "■ 停止" : "▶ 再生"}
         </button>
-        <select value={speed} onChange={(e) => onChangeSpeed(Number(e.target.value))} aria-label="再生速度">
-          {PLAYBACK_SPEEDS.map((s) => (
-            <option key={s} value={s}>×{s}</option>
-          ))}
-        </select>
-        <select value={tone} onChange={(e) => onChangeTone(e.target.value)} aria-label="ギター音色">
-          {GUITAR_TONES.map((t) => (
-            <option key={t.id} value={t.id}>{t.label}</option>
-          ))}
-        </select>
         <button className="tool" onClick={onRegenerate}>↻ 再生成</button>
         <button className="tool" onClick={onCopy}>{copied ? "✓ コピーしました" : "⧉ コピー"}</button>
         <span className="duration">全{totalBars}小節 ・ 約{duration}</span>
