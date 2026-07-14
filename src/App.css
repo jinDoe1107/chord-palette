@@ -95,7 +95,7 @@ header {
 .modal-backdrop { position: fixed; inset: 0; z-index: 30; background: rgba(0, 0, 0, .55); }
 .panel.settings-modal {
   position: fixed; z-index: 31; top: calc(50% + 28px); left: 50%; transform: translate(-50%, -50%);
-  width: min(560px, calc(100vw - 32px));
+  width: min(760px, calc(100vw - 32px));
   max-height: calc(100vh - 48px); overflow-y: auto;
   padding-top: 0; /* ヘッダー自身が上パディングを持ち、スクロール時も同じ位置に貼り付く */
   box-shadow: inset 0 1px 0 rgba(255,255,255,.6), inset 0 -2px 6px rgba(0,0,0,.15), 0 24px 60px rgba(0,0,0,.6);
