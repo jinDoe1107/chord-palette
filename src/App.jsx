@@ -252,12 +252,21 @@ export default function App() {
         </header>
 
         <div className="settings-bar">
-          <button className="tool" onClick={() => setSettingsOpen(true)} aria-haspopup="dialog">
-            ⚙ 設定
-          </button>
-          <div className="combo">
-            <b>{genre.label}</b> × <b>{mood.label}</b> ・ {NOTE_NAMES[keyIndex]}{keyModeLabel} ・ ♩={bpm}
-          </div>
+          {song ? (
+            <button className="combo-card" onClick={() => setSettingsOpen(true)} aria-haspopup="dialog">
+              <span className="combo">
+                <b>{genre.label}</b> × <b>{mood.label}</b> ・ {NOTE_NAMES[keyIndex]}{keyModeLabel} ・ ♩={bpm}
+              </span>
+              <span className="combo-edit">✎ 設定を変える</span>
+            </button>
+          ) : (
+            <>
+              <button className="gen create-cta" onClick={() => setSettingsOpen(true)} aria-haspopup="dialog">
+                ✦ コード進行をつくる
+              </button>
+              <div className="create-sub">ジャンルとムードを選ぶだけで、コード進行をおまかせ生成できます</div>
+            </>
+          )}
         </div>
 
         {/* Sheet */}
@@ -294,10 +303,10 @@ export default function App() {
         {/* Settings modal */}
         {settingsOpen && <div className="modal-backdrop" onClick={() => setSettingsOpen(false)} />}
         {settingsOpen && (
-          <div className="panel settings-modal" role="dialog" aria-modal="true" aria-label="設定">
+          <div className="panel settings-modal" role="dialog" aria-modal="true" aria-label={song ? "設定を変更" : "コード進行をつくる"}>
             <div className="settings-modal-head">
-              <span className="settings-modal-title">設定</span>
-              <button className="x" onClick={() => setSettingsOpen(false)} aria-label="設定を閉じる">×</button>
+              <span className="settings-modal-title">{song ? "設定を変更" : "コード進行をつくる"}</span>
+              <button className="x" onClick={() => setSettingsOpen(false)} aria-label="閉じる">×</button>
             </div>
             <SectionHeader label="ジャンル" open={open.genre} onToggle={() => toggleSection("genre")} />
             {open.genre && (
@@ -455,7 +464,7 @@ export default function App() {
             )}
 
             <button className="gen" onClick={generate} disabled={structure.length === 0}>
-              コード進行を生成
+              {song ? "この設定でつくり直す" : "コード進行を生成"}
             </button>
             <div className="combo">
               <b>{genre.label}</b> × <b>{mood.label}</b> ・ {NOTE_NAMES[keyIndex]}{keyModeLabel} ・ ♩={bpm}

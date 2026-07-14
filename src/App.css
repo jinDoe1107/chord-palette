@@ -54,9 +54,20 @@ header {
 .panel, .sheet { min-width: 0; }
 
 /* ---- Settings bar (opens the modal) ---- */
-.settings-bar { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; flex-wrap: wrap; }
+.settings-bar { display: flex; flex-direction: column; align-items: stretch; gap: 6px; margin-bottom: 16px; }
 .settings-bar .combo { margin-top: 0; text-align: left; color: #a9a08a; }
 .settings-bar .combo b { color: #EDE6D6; }
+.create-cta { margin-top: 0; }
+.create-sub { font-size: 12px; color: #a9a08a; text-align: center; }
+.combo-card {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  border: 1px solid #33343a; border-radius: 8px; padding: 9px 14px; cursor: pointer;
+  background: linear-gradient(180deg, #2b2d31, #1c1d20); color: inherit;
+  font-family: inherit; font-size: inherit; text-align: left;
+}
+.combo-card:hover { border-color: var(--acc); }
+.combo-card:hover .combo-edit { filter: brightness(1.2); }
+.combo-edit { color: var(--acc); font-size: 13px; font-weight: 600; white-space: nowrap; }
 
 /* ---- Control panel: brushed aluminum ---- */
 .panel {
@@ -83,7 +94,7 @@ header {
 /* ---- Settings modal (the old left panel, now floating) ---- */
 .modal-backdrop { position: fixed; inset: 0; z-index: 30; background: rgba(0, 0, 0, .55); }
 .panel.settings-modal {
-  position: fixed; z-index: 31; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  position: fixed; z-index: 31; top: calc(50% + 28px); left: 50%; transform: translate(-50%, -50%);
   width: min(560px, calc(100vw - 32px));
   max-height: calc(100vh - 48px); overflow-y: auto;
   padding-top: 0; /* ヘッダー自身が上パディングを持ち、スクロール時も同じ位置に貼り付く */

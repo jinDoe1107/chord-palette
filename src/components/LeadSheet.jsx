@@ -37,8 +37,8 @@ export default function LeadSheet({ song, aiStatus, aiProgress, hasWebGPU, onTog
     return (
       <>
         <div className="empty">
-          「＋ セクションを追加」で一からコード進行を作成できます。<br />
-          「⚙ 設定」の「コード進行を生成」でおまかせ生成もできます
+          「✦ コード進行をつくる」でジャンル・ムードからおまかせ生成できます。<br />
+          「＋ セクションを追加」で一から手動作成もできます
         </div>
         {addSectionCard}
       </>
