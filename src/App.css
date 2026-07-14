@@ -308,6 +308,7 @@ footer.credits a:hover { color: var(--acc); }
 .section-gap.open { margin: 0; }
 .gap-add {
   width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; padding: 0;
   border: 1px solid #55575a; background: linear-gradient(180deg, #3a3c40, #232427);
   color: #9a9c9e; font-size: 14px; line-height: 1; cursor: pointer;
   opacity: .4; transition: all .15s;
