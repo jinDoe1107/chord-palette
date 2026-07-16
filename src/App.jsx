@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import "./App.css";
-import { NOTE_NAMES, MOODS, GENRES, LENGTH_RANGE } from "./data/musicData.js";
+import { NOTE_NAMES, MOODS, GENRES, LENGTH_RANGE, SECTION_TYPE_LABELS_EN } from "./data/musicData.js";
 import { songDurationSeconds, formatDuration } from "./lib/duration.js";
 import { PLAYBACK_SPEEDS } from "./lib/playbackSpeed.js";
 import { GUITAR_TONES } from "./lib/guitarTones.js";
@@ -239,7 +239,11 @@ export default function App() {
     const text = [
       `[KEY: ${keyLabel}]`,
       `[BPM: ${song.tempo}]`,
-      ...song.sections.flatMap((s) => ["", `[${s.label}]`, ...chordLines(s.chords)]),
+      ...song.sections.flatMap((s) => [
+        "",
+        `[${SECTION_TYPE_LABELS_EN[s.type] ?? s.label}]`,
+        ...chordLines(s.chords),
+      ]),
     ].join("\n");
     navigator.clipboard.writeText(text).then(() => {
       setCopied(true);

@@ -64,5 +64,20 @@ export const SECTION_TYPES = [
   { id: "outro", label: "アウトロ" },
 ];
 
+/* コピーボタンの出力テキスト専用の英語セクション名(表示用ラベルは日本語のまま維持) */
+export const SECTION_TYPE_LABELS_EN = {
+  intro: "Intro",
+  a: "Verse 1",
+  b: "Verse 2",
+  prechorus: "Pre-Chorus",
+  chorus: "Chorus",
+  c: "Verse 3",
+  bridge: "Bridge",
+  solo: "Solo",
+  inter: "Interlude",
+  breakdown: "Breakdown",
+  outro: "Outro",
+};
+
 /* 「おまかせ曲構成」の目標尺: 1分〜8分を30秒刻みで指定 */
 export const LENGTH_RANGE = { min: 60, max: 480, step: 30, default: 240 };
